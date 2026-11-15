@@ -29,8 +29,9 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 
-[project.urls]
-Repository = "https://gitlab.brainstorm.it/colorcraft/main/django-htmx-datatable"
+# Private repository, not reachable from PyPI: restore with the GitHub URL when going public.
+# [project.urls]
+# Repository = "https://gitlab.brainstorm.it/colorcraft/main/django-htmx-datatable"
 
 [tool.setuptools.packages.find]
 include = ["htmx_datatable*"]
