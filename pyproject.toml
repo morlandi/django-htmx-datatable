@@ -4,7 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-htmx-datatable"
-version = "0.0.1"
+dynamic = ["version"]
+# version = "0.0.1"
 description = "Searchable, sortable, filterable, paginated tables for Django models, rendered server-side with htmx"
 readme = "README.md"
 license = "MIT"
@@ -35,3 +36,6 @@ classifiers = [
 
 [tool.setuptools.packages.find]
 include = ["htmx_datatable*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "htmx_datatable.__version__" }
