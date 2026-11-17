@@ -1,0 +1,15 @@
+<div class="htmx-datatable" id="{{ table.id }}">
+  <form class="htmx-datatable-form" action="{{ table.url }}" method="get"
+        hx-get="{{ table.url }}" hx-trigger="submit" hx-swap="none">
+    {% block toolbar %}{% include "htmx_datatable/toolbar.html" %}{% endblock %}
+    {% block status %}{% include "htmx_datatable/status.html" %}{% endblock %}
+    <table class="htmx-datatable-table">
+      <thead>
+        {% block header %}{% include "htmx_datatable/header_row.html" %}{% endblock %}
+        {% if table.has_filters %}{% block filters %}{% include "htmx_datatable/filter_row.html" %}{% endblock %}{% endif %}
+      </thead>
+      {% block body %}{% include "htmx_datatable/body.html" %}{% endblock %}
+    </table>
+    {% block pager %}{% include "htmx_datatable/pager.html" %}{% endblock %}
+  </form>
+</div>

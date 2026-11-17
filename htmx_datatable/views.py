@@ -1,29 +1,39 @@
 """
-The table view.
-
-For now the column declarations and their validation (#2) and the query
-engine (#3); the HTTP side comes with #4.
+The table view: column declarations and their validation (#2), the query
+engine (#3), the HTTP side and the templates (#4).
 """
 import logging
 
 from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.paginator import Paginator
 from django.db.models import F
 from django.db.models.constants import LOOKUP_SEP
+from django.utils.cache import patch_vary_headers
 from django.views.generic import View
+from django.views.generic.base import ContextMixin, TemplateResponseMixin
 
 from .columns import ComputedColumn, words_q
 from .paths import accessor_name
+from .protocol import ParamNames, canonical_params, canonical_url, parse_state
+from .table import Table, effective_ordering, make_header, make_rows
 
 logger = logging.getLogger(__name__)
 
 
-class HtmxDatatableView(View):
+class HtmxDatatableView(TemplateResponseMixin, ContextMixin, View):
     model = None
     columns = []
     # Default ordering, in the syntax of the "o" parameter: ["-published"] (D5)
     ordering = None
     # OR separator in search and filter values, e.g. "+" (R5); None: disabled
     search_values_separator = None
+    # GET parameter prefix, to host several tables on one page (D5)
+    prefix = ""
+    page_sizes = [10, 25, 50, 100]
+    # Delay before the search or a text filter sends a request, in ms (J)
+    search_delay = 300
+    # template_name: the consumer's page, which includes "htmx_datatable/table.html"
+    fragment_template_name = "htmx_datatable/fragment.html"
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -79,6 +89,59 @@ class HtmxDatatableView(View):
         if columns is self.columns:
             return self._bound_columns
         return self.bind_columns(columns)
+
+    def get(self, request, *args, **kwargs):
+        """The full page for a plain GET, the fragment for an htmx request (D3, D5)."""
+        table = self.get_table(request)
+        if self.is_htmx(request):
+            response = self.response_class(
+                request=request, template=[self.fragment_template_name], context={"table": table}
+            )
+            names = ParamNames(self.prefix)
+            current_url = request.headers.get("HX-Current-URL") or request.get_full_path()
+            params = canonical_params(table.state, names, self.page_sizes)
+            response["HX-Replace-Url"] = canonical_url(current_url, params, names)
+        else:
+            # Choices are computed only when the filter row is rendered (R2)
+            for cell in table.header:
+                if cell.widget == "select":
+                    cell.choices = self.get_column_choices(request, cell.column)
+            response = self.render_to_response(self.get_context_data(table=table))
+        patch_vary_headers(response, ["HX-Request"])
+        return response
+
+    def is_htmx(self, request):
+        """An htmx request, but not a boosted navigation (which wants the full page)."""
+        return request.headers.get("HX-Request") == "true" and request.headers.get("HX-Boosted") != "true"
+
+    def get_table(self, request):
+        """The Table for this request: state, query, page, header and rows."""
+        names = ParamNames(self.prefix)
+        columns = self.get_bound_columns(request)
+        state = parse_state(request.GET, names, [c.name for c in columns], self.page_sizes)
+        qs, errors = self.get_table_queryset(request, state)
+        page = Paginator(qs, state.page_size).get_page(state.page)
+        # The page actually shown, for the canonical URL
+        state.page = page.number
+        filtered = bool(state.search or state.filters)
+        ordering = effective_ordering(columns, state.ordering, self._default_ordering())
+        return Table(
+            id=self.prefix or "dt",
+            url=request.path,
+            names={key: names.name(key) for key in ("q", "o", "page", "page_size")},
+            state=state,
+            header=make_header(self, columns, state, names, ordering),
+            rows=make_rows(self, columns, page.object_list),
+            page=page,
+            total_count=self.get_initial_queryset(request).count() if filtered else None,
+            errors=errors,
+            page_sizes=self.page_sizes,
+            search_delay=self.search_delay,
+        )
+
+    def _default_ordering(self):
+        """The view's `ordering` as (name, descending) pairs."""
+        return [(e.removeprefix("-"), e.startswith("-")) for e in self.ordering or ()]
 
     def get_initial_queryset(self, request):
         return self.model._default_manager.all()
@@ -147,7 +210,7 @@ class HtmxDatatableView(View):
         """
         keys = self._ordering_keys(columns, state.ordering)
         if not keys:
-            default = [(e.removeprefix("-"), e.startswith("-")) for e in self.ordering or ()]
+            default = self._default_ordering()
             keys = self._ordering_keys(columns, default)
         if not keys:
             keys = list(qs.query.order_by or self.model._meta.ordering)
@@ -198,5 +261,5 @@ class HtmxDatatableView(View):
                 .values_list(column.name, flat=True)
                 .distinct()
             )
-            choices = [(value, value) for value in values if value is not None]
+            choices = [(value, column.format_value(value)) for value in values if value is not None]
         return choices

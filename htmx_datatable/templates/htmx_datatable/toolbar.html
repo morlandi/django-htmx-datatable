@@ -1,0 +1,15 @@
+{% load i18n %}
+<div class="htmx-datatable-toolbar">
+  {% include "htmx_datatable/ordering_input.html" %}
+  <input type="search" class="htmx-datatable-search" name="{{ table.names.q }}" value="{{ table.state.search }}"
+         placeholder="{% translate 'Search' %}" aria-label="{% translate 'Search' %}"
+         hx-get="{{ table.url }}" hx-include="closest form"
+         hx-trigger="input changed delay:{{ table.search_delay }}ms, search">
+  <label class="htmx-datatable-page-size">{% translate "Rows per page" %}
+    <select name="{{ table.names.page_size }}" hx-get="{{ table.url }}" hx-include="closest form" hx-trigger="change">
+      {% for size in table.page_sizes %}
+        <option value="{{ size }}"{% if size == table.state.page_size %} selected{% endif %}>{{ size }}</option>
+      {% endfor %}
+    </select>
+  </label>
+</div>

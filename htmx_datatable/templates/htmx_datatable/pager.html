@@ -1,0 +1,20 @@
+{% load i18n %}
+<nav class="htmx-datatable-pager" id="{{ table.id }}-pager" aria-label="{% translate 'Pages' %}"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if table.page.paginator.num_pages > 1 %}
+    {% if table.page.has_previous %}
+      <button type="submit" name="{{ table.names.page }}" value="{{ table.page.previous_page_number }}" aria-label="{% translate 'Previous page' %}">‹</button>
+    {% endif %}
+    {% for number in table.page_range %}
+      {% if number == table.ellipsis %}
+        <span>{{ number }}</span>
+      {% elif number == table.page.number %}
+        <button type="button" aria-current="page" disabled>{{ number }}</button>
+      {% else %}
+        <button type="submit" name="{{ table.names.page }}" value="{{ number }}">{{ number }}</button>
+      {% endif %}
+    {% endfor %}
+    {% if table.page.has_next %}
+      <button type="submit" name="{{ table.names.page }}" value="{{ table.page.next_page_number }}" aria-label="{% translate 'Next page' %}">›</button>
+    {% endif %}
+  {% endif %}
+</nav>

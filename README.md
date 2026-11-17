@@ -18,6 +18,17 @@ Design decisions and roadmap: [docs/2026-11-15_design.md](docs/2026-11-15_design
 - Django >= 5.1
 - htmx 2.x
 
+## Example project
+
+```
+cd example
+python manage.py migrate
+python manage.py loaddata books
+python manage.py runserver
+```
+
+Then open http://127.0.0.1:8000/.
+
 ## License
 
 MIT
