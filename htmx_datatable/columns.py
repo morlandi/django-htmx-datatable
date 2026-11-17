@@ -49,7 +49,6 @@ class Column:
         lookup_field=None,
         max_length=None,
         css_class=None,
-        initial_search_value=None,
         order_by=None,
         search_fields=None,
         nulls_last=False,
@@ -65,7 +64,6 @@ class Column:
         self.lookup_field = lookup_field
         self.max_length = max_length
         self.css_class = css_class
-        self.initial_search_value = initial_search_value
         self.order_by = tuple(order_by) if order_by is not None else None
         self.search_fields = tuple(search_fields) if search_fields is not None else None
         self.nulls_last = nulls_last
