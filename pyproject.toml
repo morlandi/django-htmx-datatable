@@ -32,7 +32,6 @@ classifiers = [
 
 [project.urls]
 Repository = "https://github.com/morlandi/django-htmx-datatable"
-# Repository = "https://gitlab.brainstorm.it/colorcraft/main/django-htmx-datatable"
 
 [tool.setuptools.packages.find]
 include = ["htmx_datatable*"]

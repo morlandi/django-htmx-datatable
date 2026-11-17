@@ -81,7 +81,7 @@ class CellTestCase(SimpleTestCase):
 
 
 class RowsTestCase(TestCase):
-    fixtures = ["books"]
+    fixtures = ["books_test"]
 
     def test_values_hooks_and_escaping(self):
         def render_title(self, obj, value):

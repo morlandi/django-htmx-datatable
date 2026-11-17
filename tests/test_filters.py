@@ -19,7 +19,7 @@ def column(declaration):
 
 
 class QueryTestCase(TestCase):
-    fixtures = ["books"]
+    fixtures = ["books_test"]
 
     def pks(self, q, qs=None):
         qs = Book.objects.all() if qs is None else qs

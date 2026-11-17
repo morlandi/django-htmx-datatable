@@ -50,7 +50,7 @@ class ResolveTestCase(TestCase):
 
 
 class ValueTestCase(TestCase):
-    fixtures = ["books"]
+    fixtures = ["books_test"]
 
     def test_plain_field(self):
         book = Book.objects.get(pk=1)

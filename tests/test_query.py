@@ -37,7 +37,7 @@ ALL_BY_TITLE = [9, 7, 1, 6, 5, 4, 2, 8, 3]
 
 
 class QueryTestCase(TestCase):
-    fixtures = ["books"]
+    fixtures = ["books_test"]
 
     def query(self, view_class=BookView, **state):
         qs, errors = view_class().get_table_queryset(RequestFactory().get("/"), TableState(**state))
