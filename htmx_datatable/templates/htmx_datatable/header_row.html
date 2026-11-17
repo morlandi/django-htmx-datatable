@@ -1,0 +1,11 @@
+<tr id="{{ table.id }}-head" class="htmx-datatable-header"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% for cell in table.header %}
+    <th scope="col"{% if cell.column.orderable %} aria-sort="{{ cell.aria_sort }}"{% endif %}{% if cell.column.css_class %} class="{{ cell.column.css_class }}"{% endif %}>
+      {% if cell.column.orderable %}
+        <button type="submit" name="{{ table.names.o }}" value="{{ cell.sort_value }}">{{ cell.column.title }}</button>
+      {% else %}
+        {{ cell.column.title }}
+      {% endif %}
+    </th>
+  {% endfor %}
+</tr>

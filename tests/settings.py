@@ -3,6 +3,8 @@ Settings for the test suite (see runtests.py).
 
 The tests use the models of the example project (example.books).
 """
+import os
+
 SECRET_KEY = "tests-not-secret"
 USE_TZ = True
 
@@ -25,7 +27,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(os.path.dirname(__file__), "templates")],
         "APP_DIRS": True,
     },
 ]

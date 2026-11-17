@@ -1,0 +1,25 @@
+{% load i18n %}
+<tr class="htmx-datatable-filters">
+  {% for cell in table.header %}
+    <td>
+      {% if cell.widget == "select" %}
+        <select name="{{ cell.filter_name }}" aria-label="{{ cell.column.title }}"
+                hx-get="{{ table.url }}" hx-include="closest form" hx-trigger="change">
+          <option value="">{% translate "All" %}</option>
+          {% for value, label in cell.choices %}
+            <option value="{{ value }}"{% if value|stringformat:"s" == cell.filter_value %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      {% elif cell.widget == "date" %}
+        <input type="date" name="{{ cell.filter_name }}" value="{{ cell.filter_value }}" aria-label="{{ cell.column.title }}"
+               hx-get="{{ table.url }}" hx-include="closest form" hx-trigger="change">
+      {% elif cell.widget == "number" %}
+        <input type="text" inputmode="decimal" name="{{ cell.filter_name }}" value="{{ cell.filter_value }}" aria-label="{{ cell.column.title }}"
+               hx-get="{{ table.url }}" hx-include="closest form" hx-trigger="input changed delay:{{ table.search_delay }}ms">
+      {% elif cell.widget == "text" %}
+        <input type="search" name="{{ cell.filter_name }}" value="{{ cell.filter_value }}" aria-label="{{ cell.column.title }}"
+               hx-get="{{ table.url }}" hx-include="closest form" hx-trigger="input changed delay:{{ table.search_delay }}ms, search">
+      {% endif %}
+    </td>
+  {% endfor %}
+</tr>

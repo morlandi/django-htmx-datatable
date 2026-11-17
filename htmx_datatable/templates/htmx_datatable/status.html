@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="htmx-datatable-status" id="{{ table.id }}-status" role="status"{% if oob %} hx-swap-oob="true"{% endif %}>
+  <span class="htmx-datatable-count">
+    {% if table.page.paginator.count %}
+      {% blocktranslate with start=table.page.start_index end=table.page.end_index rows=table.page.paginator.count %}{{ start }}–{{ end }} of {{ rows }}{% endblocktranslate %}
+    {% else %}
+      {% translate "No rows" %}
+    {% endif %}
+    {% if table.total_count is not None %}
+      {% blocktranslate with total=table.total_count %}(filtered from {{ total }}){% endblocktranslate %}
+    {% endif %}
+  </span>
+  {% for column, message in table.errors %}
+    <span class="htmx-datatable-error">{{ column.title }}: {{ message }}</span>
+  {% endfor %}
+</div>

@@ -13,6 +13,7 @@ import datetime
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import models
 from django.db.models import ForeignObjectRel, Q
+from django.utils import formats, timezone
 from django.utils.text import capfirst
 from django.utils.translation import gettext as _
 
@@ -198,6 +199,24 @@ class Column:
             return Q(**{f"{self.name}__in": values}) if values else None
         return Q(**{f"{self.name}__{lookup}": term})
 
+    def format(self, value):
+        """
+        The text of a cell (R3): "" for None; the values of a multi-valued path
+        formatted one by one and joined by commas.
+        """
+        if value is None:
+            return ""
+        if isinstance(value, list):
+            return ", ".join(self.format(v) for v in value if v is not None)
+        return self.format_value(value)
+
+    def format_value(self, value):
+        """One value: the choice label when there are choices, else str()."""
+        choices = self.static_choices()
+        if choices is not None:
+            return str(dict(choices).get(value, value))
+        return str(value)
+
 
 class TextColumn(Column):
     """A text field."""
@@ -224,6 +243,9 @@ class NumberColumn(Column):
         number = self._parse(term)
         return None if number is None else Q(**{self.name: number})
 
+    def format_value(self, value):
+        return formats.localize(value)
+
 
 class DateColumn(Column):
     """A date field. Filter values are ISO dates (D5); search terms are read as the user sees them."""
@@ -240,6 +262,10 @@ class DateColumn(Column):
         date = parse_date(term)
         return None if date is None else Q(**{self.filter_path: date})
 
+    def format_value(self, value):
+        # SHORT_DATE_FORMAT: the format the global search reads back (R3, R5)
+        return formats.date_format(value, "SHORT_DATE_FORMAT")
+
 
 class DateTimeColumn(DateColumn):
     """A datetime field, filtered and searched on its date."""
@@ -247,6 +273,11 @@ class DateTimeColumn(DateColumn):
     @property
     def filter_path(self):
         return f"{self.name}__date"
+
+    def format_value(self, value):
+        if timezone.is_aware(value):
+            value = timezone.localtime(value)
+        return formats.date_format(value, "SHORT_DATETIME_FORMAT")
 
 
 class BooleanColumn(Column):
@@ -267,6 +298,9 @@ class BooleanColumn(Column):
 
     def term_q(self, term, lookup):
         return None
+
+    def format_value(self, value):
+        return _("Yes") if value else _("No")
 
 
 class ChoiceColumn(Column):

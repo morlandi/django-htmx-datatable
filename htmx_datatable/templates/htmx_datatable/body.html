@@ -1,0 +1,12 @@
+{% load i18n %}
+<tbody id="{{ table.id }}-body" class="htmx-datatable-body"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% for row in table.rows %}
+    <tr data-pk="{{ row.pk }}">
+      {% for cell in row.cells %}
+        <td{% if cell.column.css_class %} class="{{ cell.column.css_class }}"{% endif %}>{% if cell.title %}<span title="{{ cell.title }}">{{ cell.content }}</span>{% else %}{{ cell.content }}{% endif %}</td>
+      {% endfor %}
+    </tr>
+  {% empty %}
+    <tr class="htmx-datatable-empty"><td colspan="{{ table.header|length }}">{% translate "No matching rows" %}</td></tr>
+  {% endfor %}
+</tbody>
