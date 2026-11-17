@@ -5,7 +5,7 @@ from example.books.models import Book
 
 
 class BootstrapTestCase(TestCase):
-    fixtures = ["books"]
+    fixtures = ["books_test"]
 
     def test_app_is_installed(self):
         self.assertTrue(apps.is_installed("htmx_datatable"))

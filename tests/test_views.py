@@ -20,7 +20,7 @@ class BookView(HtmxDatatableView):
 
 
 class ViewTestCase(TestCase):
-    fixtures = ["books"]
+    fixtures = ["books_test"]
 
     def get(self, query="", view_class=BookView, **headers):
         request = RequestFactory().get(f"/books/?{query}", headers=headers)
