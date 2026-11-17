@@ -27,7 +27,7 @@ class HtmxDatatableView(View):
 
         Raises ImproperlyConfigured, naming the view and the column.
         """
-        annotations = {c.name for c in columns if c.annotation}
+        annotations = {c.name: c for c in columns if c.annotation}
         names = set()
         bound = []
         for column in columns:
