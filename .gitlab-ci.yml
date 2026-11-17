@@ -11,6 +11,9 @@ test:
         DJANGO: ["5.1", "5.2", "6.1"]
       - PYTHON: ["3.14"]
         DJANGO: ["6.1"]
+      # Django 5.1.4: the exact version ccshop runs on.
+      - PYTHON: ["3.12"]
+        DJANGO: ["5.1.4"]
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
   cache:

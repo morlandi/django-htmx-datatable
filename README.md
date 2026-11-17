@@ -8,7 +8,8 @@ without jQuery and datatables.net.
 
 ## Status
 
-Early development, not usable yet. The API will change without notice.
+0.1: first usable version, not on PyPI yet; the API may still change before 1.0.
+Changes: [CHANGELOG.md](CHANGELOG.md).
 
 Design decisions and roadmap: [docs/2026-11-15_design.md](docs/2026-11-15_design.md).
 
