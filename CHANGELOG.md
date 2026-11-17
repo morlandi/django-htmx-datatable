@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.1 (unreleased)
+
+First release on PyPI.
+
+- README rewritten as a step-by-step tutorial, with screenshots.
+- Removed `Column(initial_search_value=...)`: it was never used. To open a
+  table already filtered, link to its URL with the query string, or redirect
+  to it (see the README).
+- Example project: a few hundred Italian classics (`loaddata books`), British
+  English as language; the tests use the small `books_test` fixture.
+
 ## 0.1.0 (2026-11-17)
 
 First usable version. Not on PyPI yet.
