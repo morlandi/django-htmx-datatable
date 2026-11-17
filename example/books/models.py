@@ -22,6 +22,19 @@ class Author(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
+class AuthorProfile(models.Model):
+    author = models.OneToOneField(
+        Author,
+        verbose_name=_("author"),
+        on_delete=models.CASCADE,
+        related_name="profile",
+    )
+    website = models.URLField(_("website"), blank=True)
+
+    def __str__(self):
+        return f"{self.author} profile"
+
+
 class Tag(models.Model):
     name = models.CharField(_("name"), max_length=50, unique=True)
 
