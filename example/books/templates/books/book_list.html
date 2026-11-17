@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Books</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; }
+    .htmx-datatable-toolbar, .htmx-datatable-status, .htmx-datatable-pager { display: flex; gap: 1rem; align-items: center; margin: .5rem 0; }
+    .htmx-datatable-table { border-collapse: collapse; width: 100%; }
+    .htmx-datatable-table th, .htmx-datatable-table td { border: 1px solid #ccc; padding: .3rem .5rem; text-align: left; }
+    .htmx-datatable-filters input, .htmx-datatable-filters select { width: 100%; box-sizing: border-box; }
+    th button { all: unset; cursor: pointer; font-weight: bold; }
+    th[aria-sort="ascending"] button::after { content: " ▲"; }
+    th[aria-sort="descending"] button::after { content: " ▼"; }
+    .htmx-datatable-error { color: #b00020; }
+  </style>
+</head>
+<body>
+  <h1>Books</h1>
+  {% include "htmx_datatable/table.html" %}
+</body>
+</html>
