@@ -69,15 +69,21 @@ class FieldPath:
         return values[0] if values else None
 
 
+def accessor_name(field):
+    """
+    The attribute that reads `field` from an instance: a reverse relation is
+    read through its accessor ("book_set" or the related_name), not through
+    its query name.
+    """
+    return field.get_accessor_name() if isinstance(field, ForeignObjectRel) else field.name
+
+
 def _step(field, value):
     """The values reached from `value` through `field`, as a list."""
     if value is None:
         return []
-    # A reverse relation is read through its accessor ("book_set" or the
-    # related_name), not through its query name.
-    attname = field.get_accessor_name() if isinstance(field, ForeignObjectRel) else field.name
     try:
-        attr = getattr(value, attname)
+        attr = getattr(value, accessor_name(field))
     except ObjectDoesNotExist:
         # Reverse one-to-one without a related object
         return []
