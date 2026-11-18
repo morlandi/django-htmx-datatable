@@ -126,8 +126,10 @@ class HtmxDatatableView(TemplateResponseMixin, ContextMixin, View):
         filtered = bool(state.search or state.filters)
         ordering = effective_ordering(columns, state.ordering, self._default_ordering())
         return Table(
-            id=self.prefix or "dt",
+            # id=self.prefix or "dt",
+            prefix=self.prefix,
             url=request.path,
+            page_url=request.path,
             names={key: names.name(key) for key in ("q", "o", "page", "page_size")},
             state=state,
             header=make_header(self, columns, state, names, ordering),

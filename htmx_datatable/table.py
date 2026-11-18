@@ -60,10 +60,16 @@ class Row:
 class Table:
     """Everything the templates need (D8)."""
 
-    def __init__(self, *, id, url, names, state, header, rows, page, total_count, errors,
-                 page_sizes, search_delay):
-        self.id = id                          # base of the element ids
-        self.url = url                        # where the form sends its requests
+    # def __init__(self, *, id, url, names, state, header, rows, page, total_count, errors,
+    #              page_sizes, search_delay):
+    #     self.id = id                          # base of the element ids
+    #     self.url = url                        # where the form sends its requests
+    def __init__(self, *, prefix, url, page_url, names, state, header, rows, page, total_count,
+                 errors, page_sizes, search_delay):
+        self.prefix = prefix                  # "" or ASCII letters and digits (#7)
+        self.id = f"dt-{prefix}" if prefix else "dt"  # base of the element ids
+        self.url = url                        # the table's endpoint: the htmx requests
+        self.page_url = page_url              # the page: the form's action without JS
         self.names = names                    # "q", "o", "page", "page_size" -> parameter name
         self.state = state
         self.header = header                  # HeaderCell, one per visible column
