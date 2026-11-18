@@ -12,7 +12,7 @@ class BookTableView(HtmxDatatableView):
     """The example table: one column of every kind."""
 
     model = Book
-    template_name = "books/book_list.html"
+    # template_name = "books/book_list.html"
     page_sizes = [5, 10, 25]
     columns = [
         Column("title", max_length=20),
