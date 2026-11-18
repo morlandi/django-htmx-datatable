@@ -142,7 +142,15 @@ class Book(models.Model):
 
 ### Step 1: the first table
 
-A table is a view. Subclass `HtmxDatatableView`, name the model and the
+A table on a page takes two views:
+
+1. **the page**: an ordinary view that renders your template, where the
+   `htmx_datatable` tag puts the table;
+2. **the table**: a subclass of `HtmxDatatableView`, with its own URL. It
+   builds the table for the page on the first visit, then answers the htmx
+   requests sent while the user searches, sorts and changes page.
+
+Start from the table. Subclass `HtmxDatatableView`, name the model and the
 columns:
 
 ```python
@@ -162,8 +170,8 @@ class BookTableView(HtmxDatatableView):
     ]
 ```
 
-The table needs two URLs: the page that shows it, and the table's own
-endpoint. The page can be any view; here a `TemplateView` is enough:
+Give each view its URL. The page can be any view; here a `TemplateView` is
+enough:
 
 ```python
 # urls.py
