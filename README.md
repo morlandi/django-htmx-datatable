@@ -12,7 +12,6 @@ updated through htmx as the user types, clicks a header or changes page.
 ```python
 class BookTableView(HtmxDatatableView):
     model = Book
-    template_name = "books/book_list.html"
     columns = [
         Column("title"),
         Column("author__last_name", title="Author"),
@@ -20,6 +19,11 @@ class BookTableView(HtmxDatatableView):
         Column("published"),
         Column("tags__name", title="Tags"),
     ]
+```
+
+```django
+{% load htmx_datatable %}
+{% htmx_datatable "books-table" %}
 ```
 
 Key ideas:
@@ -34,6 +38,8 @@ Key ideas:
   string: a table state can be bookmarked, reloaded and shared.
 - **Unstyled templates.** Plain semantic markup with stable class names,
   meant to be overridden for your CSS framework.
+- **Tables, not pages.** A table is shown by any page with one template tag,
+  and a page can show several tables.
 
 It is the successor of
 [django-ajax-datatable](https://github.com/morlandi/django-ajax-datatable),
@@ -44,7 +50,7 @@ without jQuery and datatables.net.
 - [Status](#status)
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Tutorial: a table of books in 8 steps](#tutorial-a-table-of-books-in-8-steps)
+- [Tutorial: a table of books in 9 steps](#tutorial-a-table-of-books-in-9-steps)
   1. [The first table](#step-1-the-first-table)
   2. [Search and column filters](#step-2-search-and-column-filters)
   3. [Columns from related models](#step-3-columns-from-related-models)
@@ -53,6 +59,7 @@ without jQuery and datatables.net.
   6. [Ordering, pages and the URL](#step-6-ordering-pages-and-the-url)
   7. [Styling and templates](#step-7-styling-and-templates)
   8. [Per-request data, custom filters](#step-8-per-request-data-custom-filters)
+  9. [Several tables on one page](#step-9-several-tables-on-one-page)
 - [Reference](#reference)
 - [How it works](#how-it-works)
 - [Coming from django-ajax-datatable](#coming-from-django-ajax-datatable)
@@ -93,7 +100,7 @@ Load htmx in the pages that show a table, for instance from a CDN:
 <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"></script>
 ```
 
-## Tutorial: a table of books in 8 steps
+## Tutorial: a table of books in 9 steps
 
 The tutorial builds the table of the [example project](#example-project), one
 feature at a time. The models are a small library:
@@ -135,8 +142,8 @@ class Book(models.Model):
 
 ### Step 1: the first table
 
-A table is a view. Subclass `HtmxDatatableView`, name the model, the page
-template and the columns:
+A table is a view. Subclass `HtmxDatatableView`, name the model and the
+columns:
 
 ```python
 # books/views.py
@@ -148,7 +155,6 @@ from .models import Book
 
 class BookTableView(HtmxDatatableView):
     model = Book
-    template_name = "books/book_list.html"
     columns = [
         Column("title"),
         Column("published"),
@@ -156,24 +162,28 @@ class BookTableView(HtmxDatatableView):
     ]
 ```
 
-Route it like any other view:
+The table needs two URLs: the page that shows it, and the table's own
+endpoint. The page can be any view; here a `TemplateView` is enough:
 
 ```python
 # urls.py
 from django.urls import path
+from django.views.generic import TemplateView
 
 from books.views import BookTableView
 
 urlpatterns = [
-    path("books/", BookTableView.as_view(), name="books"),
+    path("books/", TemplateView.as_view(template_name="books/book_list.html"), name="books"),
+    path("books/table/", BookTableView.as_view(), name="books-table"),
 ]
 ```
 
-The page template is yours: put the table where you want it with an include.
-The view passes it a `table` object with everything the templates need.
+The page template is yours: put the table where you want it with the
+`htmx_datatable` tag and the URL name of the endpoint.
 
 ```django
 {# books/templates/books/book_list.html #}
+{% load htmx_datatable %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -183,10 +193,23 @@ The view passes it a `table` object with everything the templates need.
 </head>
 <body>
   <h1>Books</h1>
-  {% include "htmx_datatable/table.html" %}
+  {% htmx_datatable "books-table" %}
 </body>
 </html>
 ```
+
+The tag needs the request in the template context: keep
+`django.template.context_processors.request` in your settings, as
+`startproject` does.
+
+**A page and an endpoint.** The page decides where the table goes; the
+endpoint is the table itself. On the first visit, the tag asks the table view
+for the whole table, in the state written in the page's URL. Then every
+search, click or page change goes to the endpoint, which answers with the
+parts of the table that changed; the URL in the address bar stays the page's.
+Opening the endpoint directly shows the table alone, which is handy to try
+it out. Since the table is not tied to a page, the same table can appear in
+several pages, or twice in the same one (step 9).
 
 Open `/books/`. You get a table with a search box, a "rows per page" select,
 a counter ("1–10 of 267"), sortable headers, a filter in every column and a
@@ -466,8 +489,8 @@ templates/htmx_datatable/pager.html     <- your pager, used everywhere
 | `fragment.html`      | the htmx response: the parts above, out of band            |
 
 `table.html` also has blocks (`toolbar`, `status`, `header`, `filters`, `body`,
-`pager`). To change the layout for one page only, extend it and include your
-version instead:
+`pager`). To change the layout for one page only, extend it and pass your
+version to the tag:
 
 ```django
 {# books/book_table.html #}
@@ -479,7 +502,7 @@ version instead:
 ```
 
 ```django
-{% include "books/book_table.html" %}
+{% htmx_datatable "books-table" template="books/book_table.html" %}
 ```
 
 Keep the element ids and the `name` attributes when you override a part: the
@@ -499,18 +522,17 @@ def get_initial_queryset(self, request):
 
 **Open the table already filtered.** The table state is the URL, so a link
 with the parameters is enough: `/books/?f_genre=novel`. When the value must be
-computed, redirect a first visit without parameters:
+computed, the page redirects a first visit without parameters (the table
+needs a `Column("created")`):
 
 ```python
 from django.shortcuts import redirect
 from django.utils import timezone
+from django.views.generic import TemplateView
 
 
-class BookTableView(HtmxDatatableView):
-    columns = [
-        # ...
-        Column("created"),
-    ]
+class BookListView(TemplateView):
+    template_name = "books/book_list.html"
 
     def get(self, request, *args, **kwargs):
         # First visit: show the books added today
@@ -521,7 +543,7 @@ class BookTableView(HtmxDatatableView):
 ```
 
 The filter shows in the URL and in its input, and the user removes it as any
-other. The htmx requests always carry the form's parameters, so they are never
+other. The htmx requests go to the table's endpoint, so they are never
 redirected. Note that the bare URL means "first visit": reloading `/books/`
 after clearing every filter applies the default again.
 
@@ -552,6 +574,73 @@ the filtered, ordered, optimized queryset and the filter errors; `state` holds
 what the user asked for. Override it, or the steps it calls
 (`filter_queryset()`, `order_queryset()`, `optimize_queryset()`), when the
 defaults are not enough.
+
+### Step 9: several tables on one page
+
+Each table on a page needs its own prefix, so that their parameters and
+element ids do not collide. The example project compares the books of two
+authors with the same table, whose endpoint takes the author in its URL:
+
+```python
+# books/views.py
+class AuthorBookTableView(HtmxDatatableView):
+    model = Book
+    ordering = ["published"]
+    columns = [
+        Column("title"),
+        Column("genre"),
+        Column("published", nulls_last=True),
+    ]
+
+    def get_initial_queryset(self, request):
+        return Book.objects.filter(author_id=self.kwargs["pk"])
+
+
+class CompareView(TemplateView):
+    template_name = "books/compare.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["calvino"] = Author.objects.get(last_name="Calvino")
+        context["pavese"] = Author.objects.get(last_name="Pavese")
+        return context
+```
+
+```python
+# urls.py
+path("compare/", CompareView.as_view(), name="compare"),
+path("authors/<int:pk>/books/table/", AuthorBookTableView.as_view(), name="author-books-table"),
+```
+
+```django
+{# books/templates/books/compare.html #}
+{% load htmx_datatable %}
+<h2>{{ calvino }}</h2>
+{% htmx_datatable "author-books-table" pk=calvino.pk prefix="calvino" %}
+<h2>{{ pavese }}</h2>
+{% htmx_datatable "author-books-table" pk=pavese.pk prefix="pavese" %}
+```
+
+- The keyword arguments of the tag, other than `prefix` and `template`, are
+  the kwargs of the endpoint's URL; the view reads them in `self.kwargs`, on
+  the page as on the endpoint.
+- Both tables keep their state in the page's URL:
+  `/compare/?calvino-q=barone&pavese-page=2`. A search in one table leaves
+  the other alone.
+- A prefix is made of ASCII letters and digits. Two tables with the same
+  prefix on one page raise `ImproperlyConfigured` when the page is rendered.
+- Every request to an endpoint must be enough on its own: what tells two
+  tables apart travels in the endpoint's URL or in the prefix, never in the
+  session.
+
+To build the table in Python instead, for instance to add it to the context
+of your own view, call `embed()`:
+
+```python
+context["books"] = BookTableView.embed(request, url=reverse("books-table"), prefix="b")
+```
+
+and render it with `{% include "htmx_datatable/table.html" with table=books %}`.
 
 ## Reference
 
@@ -603,13 +692,25 @@ override the choice, and always for annotations.
 |---------------------------|----------------------------------|----------------------------------------------------------|
 | `model`                   | —                                | the model of the table                                   |
 | `columns`                 | `[]`                             | the column declarations                                  |
-| `template_name`           | —                                | your page, which includes `htmx_datatable/table.html`    |
 | `ordering`                | `None`                           | default ordering, e.g. `["-published"]`                  |
 | `page_sizes`              | `[10, 25, 50, 100]`              | rows per page; the first is the default                  |
 | `search_delay`            | `300`                            | ms to wait after typing before a request                 |
 | `search_values_separator` | `None`                           | OR separator in search and filter values, e.g. `"+"`     |
-| `prefix`                  | `""`                             | prefix of the GET parameters (`orders-q`); several tables on one page come in 0.2 |
 | `fragment_template_name`  | `"htmx_datatable/fragment.html"` | the template of the htmx response                        |
+
+### The template tag
+
+`{% load htmx_datatable %}`, then `{% htmx_datatable "url-name" ... %}`:
+
+| argument          | default                       | meaning                                                  |
+|-------------------|-------------------------------|----------------------------------------------------------|
+| `"url-name"`      | —                             | the URL name of the table's endpoint                     |
+| other keywords    | —                             | the kwargs of that URL, e.g. `pk=author.pk`              |
+| `prefix`          | `""`                          | prefix of the GET parameters and element ids; ASCII letters and digits |
+| `template`        | `"htmx_datatable/table.html"` | the template of the table, for this page only            |
+
+In Python: `MyTableView.embed(request, *, url, prefix="", kwargs=None)`
+returns the `table` object, for `{% include "htmx_datatable/table.html" with table=... %}`.
 
 ### View methods to override
 
@@ -634,9 +735,11 @@ override the choice, and always for annotations.
 | `f_<column>` | column filter                    | `f_genre=novel`         |
 
 Choices carry the value, not the label; booleans are `1` / `0`; dates are ISO
-(`2026-11-17`) whatever the language. With `prefix = "orders"`, every
-parameter becomes `orders-q`, `orders-f_genre` and so on. Unknown and invalid
-values fall back to the defaults.
+(`2026-11-17`) whatever the language. With `prefix="orders"` in the tag,
+every parameter becomes `orders-q`, `orders-f_genre` and so on, and the form
+carries a hidden `_dt=orders` input that tells the endpoint which table is
+asking; `_dt` never shows in the page's URL. Unknown and invalid values fall
+back to the defaults.
 
 ### The `table` object
 
@@ -644,8 +747,10 @@ What the templates receive, as plain attributes:
 
 | attribute            | meaning                                                           |
 |----------------------|-------------------------------------------------------------------|
-| `id`                 | base of the element ids (`dt`, or the prefix)                     |
-| `url`                | where the form sends its requests                                 |
+| `id`                 | base of the element ids: `dt`, or `dt-<prefix>`                   |
+| `prefix`             | the prefix, or `""`                                               |
+| `url`                | the endpoint, where the htmx requests go                          |
+| `page_url`           | the page, the form's action without JavaScript                    |
 | `names`              | parameter names: `names.q`, `names.o`, `names.page`, `names.page_size` |
 | `state`              | the parsed state: `search`, `ordering`, `filters`, `page`, `page_size` |
 | `header`             | one cell per visible column (see below)                           |
@@ -669,9 +774,9 @@ click), `widget` (`"text"`, `"select"`, `"date"`, `"number"` or `None`),
 
 ```
 first visit                         GET /books/
-                                    -> the whole page, table included
+                                    -> the page, the table embedded by the tag
 
-typing, clicking, changing page     GET /books/?q=calvino&...   (HX-Request: true)
+typing, clicking, changing page     GET /books/table/?q=calvino&...   (HX-Request: true)
                                     -> a fragment: body, header, status, pager,
                                        each swapped in by id (hx-swap-oob)
                                     -> HX-Replace-Url: /books/?q=calvino
@@ -684,13 +789,17 @@ typing, clicking, changing page     GET /books/?q=calvino&...   (HX-Request: tru
   focus and caret.
 - The response carries the new URL in `HX-Replace-Url`, built by the server
   from the state, without empty or default values.
-- A plain GET to the same URL renders the whole page, so a bookmarked URL, a
-  reload and a browser without JavaScript all work.
+- The new URL is the page's: the server starts from the browser's URL
+  (`HX-Current-URL`) and changes only the parameters of the table that asked.
+- A plain GET to the page renders it with the table in its state, so a
+  bookmarked URL, a reload and a browser without JavaScript all work.
 
 ## Coming from django-ajax-datatable
 
 There is no compatibility layer: moving a table is a rewrite of its
-declaration, usually shorter than the original. The main correspondences:
+declaration, usually shorter than the original. The structure stays the same:
+an ordinary view renders the page, and a dedicated view serves the table
+(step 1), without JavaScript to write. The main correspondences:
 
 | django-ajax-datatable                         | django-htmx-datatable                          |
 |-----------------------------------------------|------------------------------------------------|
@@ -709,7 +818,7 @@ declaration, usually shorter than the original. The main correspondences:
 | `length_menu`                                 | `page_sizes`                                   |
 | `render_column()`, `customize_row()`          | `render_<name>(obj, value)`                    |
 | `disable_queryset_optimization_*`             | override `optimize_queryset()`                 |
-| `AjaxDatatableViewUtils.initialize_table()`   | `{% include "htmx_datatable/table.html" %}`    |
+| `AjaxDatatableViewUtils.initialize_table()`   | `{% htmx_datatable "url-name" %}`              |
 | jQuery, datatables.net                        | htmx                                           |
 
 Not available yet: the global date range filter (`latest_by`), row details,
@@ -719,7 +828,7 @@ row tools, footer totals and multi-column sort; they are planned for 0.2.
 
 The [example project](https://github.com/morlandi/django-htmx-datatable/tree/main/example)
 in the repository has the books table of the tutorial, with a few hundred
-Italian classics:
+Italian classics, and the page with two tables of step 9 (`/compare/`):
 
 ```bash
 cd example
