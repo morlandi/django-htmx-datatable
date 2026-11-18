@@ -830,7 +830,7 @@ an ordinary view renders the page, and a dedicated view serves the table
 | jQuery, datatables.net                        | htmx                                           |
 
 Not available yet: the global date range filter (`latest_by`), row details,
-row tools, footer totals and multi-column sort; they are planned for 0.2.
+row tools, footer totals and multi-column sort; they are on the roadmap.
 
 ## Example project
 
