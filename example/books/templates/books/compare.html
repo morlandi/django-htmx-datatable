@@ -1,0 +1,10 @@
+{% extends "books/base.html" %}
+{% load htmx_datatable %}
+{% block title %}Two authors{% endblock %}
+{% block content %}
+  <h1>Two authors</h1>
+  <h2>{{ calvino }}</h2>
+  {% htmx_datatable "author-books-table" pk=calvino.pk prefix="calvino" %}
+  <h2>{{ pavese }}</h2>
+  {% htmx_datatable "author-books-table" pk=pavese.pk prefix="pavese" %}
+{% endblock %}

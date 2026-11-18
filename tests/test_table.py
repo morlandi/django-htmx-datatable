@@ -171,12 +171,22 @@ class HeaderTestCase(SimpleTestCase):
 
 class TableTestCase(SimpleTestCase):
 
-    def test_page_range_and_ordering_value(self):
+    def make_table(self, prefix=""):
         page = Paginator(range(200), 10).get_page(10)
-        table = Table(
-            id="dt", url="/books/", names={}, state=TableState(ordering=[("pages", True), ("title", False)]),
+        return Table(
+            prefix=prefix, url="/books/table/", page_url="/books/", names={},
+            state=TableState(ordering=[("pages", True), ("title", False)]),
             header=[], rows=[], page=page, total_count=None, errors=[], page_sizes=[10], search_delay=300,
         )
+
+    def test_page_range_and_ordering_value(self):
+        table = self.make_table()
         self.assertEqual(table.ordering_value, "-pages,title")
         self.assertEqual(table.page_range, [1, table.ellipsis, 8, 9, 10, 11, 12, table.ellipsis, 20])
         self.assertFalse(table.has_filters)
+
+    def test_element_ids(self):
+        self.assertEqual(self.make_table().id, "dt")
+        self.assertEqual(self.make_table("calvino").id, "dt-calvino")
+        # A table with prefix "dt" does not collide with the one without prefix
+        self.assertEqual(self.make_table("dt").id, "dt-dt")

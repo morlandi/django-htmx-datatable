@@ -85,3 +85,19 @@ class CanonicalTestCase(SimpleTestCase):
 
     def test_no_parameters(self):
         self.assertEqual(canonical_url("/books/?q=old", [], ParamNames()), "/books/")
+
+    def test_prefix_param_is_dropped(self):
+        url = canonical_url("/books/?_dt=orders&tab=1", [("orders-q", "new")], ParamNames("orders"))
+        self.assertEqual(url, "/books/?tab=1&orders-q=new")
+
+
+class PrefixTestCase(SimpleTestCase):
+
+    def test_valid(self):
+        for prefix in ("", "orders", "B2", "dt"):
+            self.assertEqual(ParamNames(prefix).prefix, prefix)
+
+    def test_invalid(self):
+        for prefix in ("a-b", "f_x", "a b", "a.b", "città"):
+            with self.subTest(prefix=prefix), self.assertRaises(ValueError):
+                ParamNames(prefix)

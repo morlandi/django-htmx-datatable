@@ -1,6 +1,8 @@
 <div class="htmx-datatable" id="{{ table.id }}">
-  <form class="htmx-datatable-form" action="{{ table.url }}" method="get"
+  {# <form class="htmx-datatable-form" action="{{ table.url }}" method="get" #}
+  <form class="htmx-datatable-form" action="{{ table.page_url }}" method="get"
         hx-get="{{ table.url }}" hx-trigger="submit" hx-swap="none">
+    {% if table.prefix %}<input type="hidden" name="_dt" value="{{ table.prefix }}">{% endif %}
     {% block toolbar %}{% include "htmx_datatable/toolbar.html" %}{% endblock %}
     {% block status %}{% include "htmx_datatable/status.html" %}{% endblock %}
     <table class="htmx-datatable-table">

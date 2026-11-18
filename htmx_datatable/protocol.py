@@ -8,12 +8,20 @@ from .state import TableState
 
 RESERVED = ("q", "o", "page", "page_size")
 FILTER_PREFIX = "f_"
+# The hidden input that tells the endpoint the prefix of the table that sent
+# the request (#7); never part of the canonical URL
+PREFIX_PARAM = "_dt"
 
 
 class ParamNames:
     """The GET parameter names of one table, with its optional prefix (D5)."""
 
     def __init__(self, prefix=""):
+        if prefix and not (prefix.isascii() and prefix.isalnum()):
+            # "-" and "_" would let the names of two tables overlap: "a-b-q"
+            # looks like a parameter of table "a", "f_x-q" like a filter of
+            # the table without prefix (#7)
+            raise ValueError(f"invalid table prefix {prefix!r}: use ASCII letters and digits only")
         self.prefix = prefix
 
     def name(self, name):
@@ -84,10 +92,15 @@ def canonical_url(current_url, params, names):
     """
     `current_url` (path and query, or absolute) with this table's parameters
     replaced by `params`; the parameters of other tables and of the page are
-    kept (D5). Returns a path with its query string.
+    kept (D5), the prefix input is dropped (#7). Returns a path with its
+    query string.
     """
     parts = urlsplit(current_url)
-    kept = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True) if not names.owns(k)]
+    # kept = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True) if not names.owns(k)]
+    kept = [
+        (k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True)
+        if not names.owns(k) and k != PREFIX_PARAM
+    ]
     return urlunsplit(("", "", parts.path, urlencode(kept + params), ""))
 
 

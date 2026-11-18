@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.0 (unreleased)
+
+Breaking changes:
+
+- A view is a table and its htmx endpoint, no longer a page:
+  `template_name` is removed. Show the table in any page with
+  `{% htmx_datatable "url-name" %}` or `embed()`; see the README.
+- The `prefix` class attribute is removed: pass `prefix=` to the tag or to
+  `embed()`. A prefix is made of ASCII letters and digits.
+- Element ids start with `dt-<prefix>` instead of `<prefix>`.
+
+Added:
+
+- Several tables on one page, also of the same class (#7).
+- The form's action is the page: a submit without JavaScript reloads it.
+
 ## 0.1.1 (2026-11-18)
 
 First release on PyPI.
