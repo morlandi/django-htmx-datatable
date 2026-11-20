@@ -79,6 +79,10 @@ class ParseDateTestCase(SimpleTestCase):
     def test_round_trip(self):
         for language in self.LANGUAGES:
             with self.subTest(language=language), translation.override(language):
+                if formats.get_format("SHORT_DATE_FORMAT") == "j N Y":
+                    # French before Django 5: "7 mars 2026" cannot be read
+                    # back, as in test_month_name_languages_fall_back_to_input_formats
+                    continue
                 rendered = formats.date_format(self.DATE, "SHORT_DATE_FORMAT")
                 self.assertEqual(parse_date(rendered), self.DATE, rendered)
 
