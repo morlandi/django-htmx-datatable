@@ -20,7 +20,7 @@ Breaking changes:
 
 Added:
 
-- Several tables on one page, also of the same class (#7).
+- Several tables on one page, also of the same class (GitLab issue #7).
 - The form's action is the page: a submit without JavaScript reloads it.
 
 ## 0.1.1 (2026-11-18)
