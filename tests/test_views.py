@@ -57,6 +57,13 @@ class FullPageTestCase(ViewTestCase):
         self.assertContains(response, 'type="date" name="f_published"')
         self.assertContains(response, 'inputmode="decimal" name="f_pages"')
 
+    def test_default_button_is_neutral(self):
+        # Enter in a text field clicks the first submit button of the form:
+        # it must not be a sort button (#1)
+        content = self.get().content.decode()
+        first_submit = content.index('type="submit"')
+        self.assertEqual(content[first_submit:].split(">")[0], 'type="submit" hidden tabindex="-1"')
+
     def test_boosted_request_gets_the_full_page(self):
         response = self.get(HX_Request="true", HX_Boosted="true")
         self.assertContains(response, '<form class="htmx-datatable-form"')

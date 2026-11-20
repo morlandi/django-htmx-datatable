@@ -1,7 +1,9 @@
 <div class="htmx-datatable" id="{{ table.id }}">
   {# <form class="htmx-datatable-form" action="{{ table.url }}" method="get" #}
-  <form class="htmx-datatable-form" action="{{ table.page_url }}" method="get"
+  <form class="htmx-datatable-form" action="{{ table.page_url }}" method="get" autocomplete="off"
         hx-get="{{ table.url }}" hx-trigger="submit" hx-swap="none">
+    {# The default button: Enter in a text field submits the current state, not a sort (#1) #}
+    <button type="submit" hidden tabindex="-1"></button>
     {% if table.prefix %}<input type="hidden" name="_dt" value="{{ table.prefix }}">{% endif %}
     {% block toolbar %}{% include "htmx_datatable/toolbar.html" %}{% endblock %}
     {% block status %}{% include "htmx_datatable/status.html" %}{% endblock %}

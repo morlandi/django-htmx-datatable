@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+Fixed:
+
+- Enter in the search box or in a text filter sorted the table by its first
+  sortable column (#1).
+- The browser no longer suggests past values in the search box and the filters.
+
 ## 0.2.1 (2026-11-20)
 
 - Django >= 4.2 (was 5.1).
