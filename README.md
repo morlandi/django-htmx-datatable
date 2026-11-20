@@ -1,5 +1,7 @@
 # django-htmx-datatable
 
+[![tests](https://github.com/morlandi/django-htmx-datatable/actions/workflows/tests.yml/badge.svg)](https://github.com/morlandi/django-htmx-datatable/actions/workflows/tests.yml)
+
 Searchable, sortable, filterable, paginated tables for Django models,
 declared once on the server and rendered as HTML with [htmx](https://htmx.org).
 

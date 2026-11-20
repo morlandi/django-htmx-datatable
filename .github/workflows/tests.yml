@@ -1,0 +1,33 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.13"]
+        django: ["5.1", "5.2", "6.1"]
+        include:
+          - python: "3.14"
+            django: "6.1"
+          # Django 5.1.4: the exact version of a downstream project.
+          - python: "3.12"
+            django: "5.1.4"
+          # Django 4.2: the minimum version.
+          - python: "3.12"
+            django: "4.2"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      # Pin Django first, so that installing the package keeps that version.
+      - run: pip install "Django~=${{ matrix.django }}.0"
+      - run: pip install -e .
+      - run: python runtests.py -v 2

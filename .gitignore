@@ -6,4 +6,3 @@ dist/
 .venv/
 venv/
 *.sqlite3
-.pip-cache/
