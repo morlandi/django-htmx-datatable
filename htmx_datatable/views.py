@@ -90,7 +90,8 @@ class HtmxDatatableView(View):
     def _check_ordering(cls):
         orderable = {c.name for c in cls._bound_columns if c.orderable}
         for entry in cls.ordering or ():
-            if entry.removeprefix("-") not in orderable:
+            # not removeprefix(): Python 3.8 (README)
+            if (entry[1:] if entry.startswith("-") else entry) not in orderable:
                 raise ImproperlyConfigured(
                     f"{cls.__name__}: ordering {entry!r} is not an orderable column"
                 )
@@ -225,7 +226,8 @@ class HtmxDatatableView(View):
 
     def _default_ordering(self):
         """The view's `ordering` as (name, descending) pairs."""
-        return [(e.removeprefix("-"), e.startswith("-")) for e in self.ordering or ()]
+        # not removeprefix(): Python 3.8 (README)
+        return [(e[1:] if e.startswith("-") else e, e.startswith("-")) for e in self.ordering or ()]
 
     def get_initial_queryset(self, request):
         return self.model._default_manager.all()

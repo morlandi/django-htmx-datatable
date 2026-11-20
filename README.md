@@ -76,8 +76,28 @@ Design decisions and roadmap: [docs/2026-11-15_design.md](https://github.com/mor
 ## Requirements
 
 - Python >= 3.12
-- Django >= 5.1
+- Django >= 4.2
 - htmx 2.x, loaded by your pages
+
+### Partial, temporary support for Python 3.8
+
+The code also runs on Python 3.8 with Django 4.2 (tested with 4.2.11), for
+projects that cannot upgrade yet. This is not an official support: the package
+still declares Python >= 3.12, Python 3.8 is not tested in CI, and the support
+will be dropped in a future release.
+
+pip refuses the package on Python 3.8, and this option cannot go in a
+requirements file. Install Django 4.2 with the project's requirements, then
+the library alone:
+
+```bash
+pip install -r requirements.txt     # with Django==4.2.*
+pip install --ignore-requires-python --only-binary django-htmx-datatable "django-htmx-datatable>=0.2.1"
+```
+
+Pin Django in your project's requirements: should a future version of the
+library need a newer Django, pip then stops with an error instead of
+upgrading it.
 
 ## Installation
 

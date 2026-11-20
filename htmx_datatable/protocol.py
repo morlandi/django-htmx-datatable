@@ -49,7 +49,8 @@ def parse_state(query, names, column_names, page_sizes):
     ordering = []
     for entry in query.get(names.name("o"), "").split(","):
         entry = entry.strip()
-        name = entry.removeprefix("-")
+        # not removeprefix(): Python 3.8 (README)
+        name = entry[1:] if entry.startswith("-") else entry
         if name:
             ordering.append((name, entry.startswith("-")))
     filters = {

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Django >= 4.2 (was 5.1).
+- Partial, temporary support for Python 3.8 and Django 4.2, for projects that
+  cannot upgrade yet; see the README for the installation. The declared
+  requirements do not change.
+
 ## 0.2.0 (2026-11-18)
 
 Breaking changes:
