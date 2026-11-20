@@ -840,12 +840,15 @@ Italian classics, and the page with two tables of step 9 (`/compare/`):
 
 ```bash
 cd example
-python manage.py migrate
-python manage.py loaddata books
-python manage.py runserver
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python manage.py migrate
+.venv/bin/python manage.py loaddata books
+.venv/bin/python manage.py runserver
 ```
 
 Then open http://127.0.0.1:8000/.
+The pages load htmx from unpkg.com, so the browser needs an internet connection.
 
 ![Searching and filtering](https://raw.githubusercontent.com/morlandi/django-htmx-datatable/main/screenshots/search.gif)
 

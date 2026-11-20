@@ -1,0 +1,3 @@
+# Requirements of the example project (Python >= 3.12).
+# The library itself is not listed: manage.py imports it from the repository root.
+Django>=5.1
