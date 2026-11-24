@@ -77,29 +77,19 @@ Design decisions and roadmap: [docs/2026-11-15_design.md](https://github.com/mor
 
 ## Requirements
 
-- Python >= 3.12
+- Python >= 3.8
 - Django >= 4.2
 - htmx 2.x, loaded by your pages
 
-### Partial, temporary support for Python 3.8
+### Python 3.8: temporary support
 
-The code also runs on Python 3.8 with Django 4.2 (tested with 4.2.11), for
-projects that cannot upgrade yet. This is not an official support: the package
-still declares Python >= 3.12, Python 3.8 is not tested in CI, and the support
-will be dropped in a future release.
+Python 3.8 is supported, with Django 4.2 only, for projects that cannot
+upgrade yet; CI tests it. The support is temporary and will be dropped in a
+future release: pin the version of the library in your requirements until
+you move to a newer Python.
 
-pip refuses the package on Python 3.8, and this option cannot go in a
-requirements file. Install Django 4.2 with the project's requirements, then
-the library alone:
-
-```bash
-pip install -r requirements.txt     # with Django==4.2.*
-pip install --ignore-requires-python --only-binary django-htmx-datatable "django-htmx-datatable>=0.2.1"
-```
-
-Pin Django in your project's requirements: should a future version of the
-library need a newer Django, pip then stops with an error instead of
-upgrading it.
+On Python 3.8 pip installs the wheel; the source distribution needs
+setuptools >= 77, which does not run on 3.8.
 
 ## Installation
 
@@ -882,6 +872,10 @@ python -m venv .venv
 .venv/bin/python runtests.py          # all tests
 .venv/bin/python runtests.py -v 2 tests.test_query
 ```
+
+On Python 3.8 `pip install -e .` fails (setuptools >= 77 does not run on 3.8):
+install only `Django~=4.2.0` and run `runtests.py` from the repository root,
+which imports the library from there.
 
 The tests use the models of the example project and the small `books_test`
 fixture (9 books); the example project loads `books` (267 books).

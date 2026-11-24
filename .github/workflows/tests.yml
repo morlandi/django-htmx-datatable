@@ -31,3 +31,15 @@ jobs:
       - run: pip install "Django~=${{ matrix.django }}.0"
       - run: pip install -e .
       - run: python runtests.py -v 2
+
+  # Python 3.8: temporary support, with Django 4.2 only.
+  # setup-python has no 3.8 on ubuntu-latest, hence the container.
+  # setuptools >= 77 (pyproject.toml) does not run on 3.8, so the package is
+  # not installed: runtests.py imports it from the repository root.
+  test-py38:
+    runs-on: ubuntu-latest
+    container: python:3.8-slim
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install "Django~=4.2.0"
+      - run: python runtests.py -v 2

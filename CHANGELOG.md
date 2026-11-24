@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3 (2026-11-24)
+
+- Python >= 3.8 (was 3.12): Python 3.8 is supported with Django 4.2 and
+  tested in CI. The support is temporary and will be dropped in a future
+  release. pip no longer needs `--ignore-requires-python`.
+
 ## 0.2.2 (2026-11-20)
 
 Fixed:
