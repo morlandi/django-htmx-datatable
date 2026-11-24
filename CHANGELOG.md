@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.4 (2026-11-24)
+
+Documentation:
+
+- README: how to show a table without the template tag, with `embed()`
+  (step 9).
+- README: pages without Django templates, as in a single-page application
+  (React, ...): how to load a table and why the htmx history must be left to
+  the router; the example project has such a page, `/spa/` (#4).
+
 ## 0.2.3 (2026-11-24)
 
 - Python >= 3.8 (was 3.12): Python 3.8 is supported with Django 4.2 and
