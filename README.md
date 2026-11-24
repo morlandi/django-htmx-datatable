@@ -653,14 +653,48 @@ path("authors/<int:pk>/books/table/", AuthorBookTableView.as_view(), name="autho
   tables apart travels in the endpoint's URL or in the prefix, never in the
   session.
 
-To build the table in Python instead, for instance to add it to the context
-of your own view, call `embed()`:
+**Without the tag: `embed()`.** The tag finds the view of the URL and calls
+its `embed()`, which returns [the `table` object](#the-table-object); then
+it renders `htmx_datatable/table.html` with it. A view can do the first part
+itself, when it needs the table's data, or must choose in Python which table
+to show. The same page as above:
 
 ```python
-context["books"] = BookTableView.embed(request, url=reverse("books-table"), prefix="b")
+# books/views.py
+from django.urls import reverse
+
+
+class CompareView(TemplateView):
+    template_name = "books/compare.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        for name in ("calvino", "pavese"):
+            author = Author.objects.get(last_name__iexact=name)
+            context[name] = author
+            context[f"{name}_table"] = AuthorBookTableView.embed(
+                self.request,
+                url=reverse("author-books-table", kwargs={"pk": author.pk}),
+                kwargs={"pk": author.pk},
+                prefix=name,
+            )
+        return context
 ```
 
-and render it with `{% include "htmx_datatable/table.html" with table=books %}`.
+```django
+{# books/templates/books/compare.html #}
+<h2>{{ calvino }} ({{ calvino_table.page.paginator.count }} books)</h2>
+{% include "htmx_datatable/table.html" with table=calvino_table %}
+<h2>{{ pavese }} ({{ pavese_table.page.paginator.count }} books)</h2>
+{% include "htmx_datatable/table.html" with table=pavese_table %}
+```
+
+- `url` is the endpoint of the same view, where the htmx requests go;
+  `kwargs` are its URL kwargs, for `self.kwargs` while the page is built.
+  The tag takes both from the URL name; `embed()` needs both.
+- Prefixes follow the rules of the tag: call `embed()` once per table and
+  request.
+- To use another template, include it instead of `htmx_datatable/table.html`.
 
 ## Reference
 
