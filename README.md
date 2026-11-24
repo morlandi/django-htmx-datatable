@@ -62,6 +62,7 @@ without jQuery and datatables.net.
   7. [Styling and templates](#step-7-styling-and-templates)
   8. [Per-request data, custom filters](#step-8-per-request-data-custom-filters)
   9. [Several tables on one page](#step-9-several-tables-on-one-page)
+- [Pages without Django templates](#pages-without-django-templates)
 - [Reference](#reference)
 - [How it works](#how-it-works)
 - [Coming from django-ajax-datatable](#coming-from-django-ajax-datatable)
@@ -696,6 +697,98 @@ class CompareView(TemplateView):
   request.
 - To use another template, include it instead of `htmx_datatable/table.html`.
 
+## Pages without Django templates
+
+A page built in the browser, as by a single-page application (React, Vue,
+...), has no template tag and no `embed()`. It still shows a table with the
+same features: the endpoint, requested without htmx, returns the whole table
+in the state of its query string.
+
+1. Fetch the endpoint with the query string of the page's URL; with a
+   prefix, add `_dt=<prefix>`.
+2. Put the HTML in a container and call `htmx.process()` on it.
+
+From then on htmx runs the table as in a Django page, and the server builds
+the canonical URL from the page's URL (`HX-Current-URL`).
+
+**The history belongs to the router.** On every update htmx saves a copy of
+the whole `<body>`, replaces the history entry with its own state, and on
+the back button puts that copy back in place of the body: the DOM of the
+application is lost, and so is the router's state. Turn this off, and apply
+the canonical URL with the router; htmx still triggers
+`htmx:replacedInHistory` on `<body>`, with the URL in `detail.path`:
+
+```js
+htmx.config.historyEnabled = false;  // no history entries, no restore on back
+htmx.config.historyCacheSize = 0;    // no copies of the page in localStorage
+```
+
+A React component, with React Router:
+
+```jsx
+import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import htmx from "htmx.org";
+
+htmx.config.historyEnabled = false;
+htmx.config.historyCacheSize = 0;
+
+export function HtmxDatatable({ endpoint, prefix = "" }) {
+  const ref = useRef(null);
+  const navigate = useNavigate();
+
+  // Load once: later changes of the URL come from the table itself
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    if (prefix) query.set("_dt", prefix);
+    const controller = new AbortController();
+    fetch(`${endpoint}?${query}`, { signal: controller.signal, credentials: "same-origin" })
+      .then((response) => response.text())
+      .then((html) => {
+        ref.current.innerHTML = html;
+        htmx.process(ref.current);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [endpoint, prefix]);
+
+  // The canonical URL of the table, applied by the router
+  useEffect(() => {
+    const sync = (event) => navigate(event.detail.path, { replace: true });
+    document.body.addEventListener("htmx:replacedInHistory", sync);
+    return () => document.body.removeEventListener("htmx:replacedInHistory", sync);
+  }, [navigate]);
+
+  return <div ref={ref} />;  // React renders nothing inside it
+}
+```
+
+```jsx
+<HtmxDatatable endpoint="/books/table/" />
+<HtmxDatatable endpoint="/authors/12/books/table/" prefix="a" />
+```
+
+- **One origin.** htmx 2 sends no request to another origin
+  (`htmx.config.selfRequestsOnly`); in development, serve the application
+  and Django from one origin, for instance with the dev server's proxy.
+- **Prefixes.** Nothing checks that two tables of a page have different
+  prefixes: that is up to the application.
+- **Back and reload.** The component reads the page's URL when it mounts,
+  so the table comes back in its state.
+- **Styles.** The table is part of the page, so the application's CSS
+  styles it (step 7).
+
+The `/spa/` page of the [example project](#example-project) does the same in
+plain JavaScript, with a small client-side router.
+
+**An iframe instead?** The application can also show a Django page with the
+table in an `<iframe>`: nothing to write on its side, and no conflict over
+the history. But the table state stays in the iframe's URL, the iframe does
+not grow with the table, the table does not get the application's styles,
+and links in the cells open inside the iframe. It suits a self-contained
+tool; for a table that is part of the application, prefer the approach
+above. See [#4](https://github.com/morlandi/django-htmx-datatable/issues/4).
+
 ## Reference
 
 ### Column options
@@ -882,7 +975,9 @@ row tools, footer totals and multi-column sort; they are on the roadmap.
 
 The [example project](https://github.com/morlandi/django-htmx-datatable/tree/main/example)
 in the repository has the books table of the tutorial, with a few hundred
-Italian classics, and the page with two tables of step 9 (`/compare/`):
+Italian classics, the page with two tables of step 9 (`/compare/`), and a
+page served without Django templates, with a small client-side router
+(`/spa/`, see [Pages without Django templates](#pages-without-django-templates)):
 
 ```bash
 cd example

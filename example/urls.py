@@ -3,7 +3,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 
 # from example.books.views import BookTableView
-from example.books.views import AuthorBookTableView, BookTableView, CompareView
+from example.books.views import AuthorBookTableView, BookTableView, CompareView, spa_page
 
 urlpatterns = [
     # path("", BookTableView.as_view(), name="books"),
@@ -11,5 +11,8 @@ urlpatterns = [
     path("books/table/", BookTableView.as_view(), name="books-table"),
     path("compare/", CompareView.as_view(), name="compare"),
     path("authors/<int:pk>/books/table/", AuthorBookTableView.as_view(), name="author-books-table"),
+    # A page without Django templates, with its client-side routes (#4)
+    path("spa/", spa_page, name="spa"),
+    path("spa/<path:route>", spa_page),
     path("admin/", admin.site.urls),
 ]

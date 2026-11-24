@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Books (no Django templates)</title>
+  <!--
+    A page served without the Django template engine, as by a single-page
+    application (#4): a tiny client-side router, and the tables fetched from
+    their endpoints. See "Pages without Django templates" in the README.
+  -->
+  <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"></script>
+  <script>
+    // The router owns the history: htmx neither writes it nor restores pages
+    htmx.config.historyEnabled = false;
+    htmx.config.historyCacheSize = 0;
+  </script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; }
+    nav { margin-bottom: 1rem; }
+    .htmx-datatable-toolbar, .htmx-datatable-status, .htmx-datatable-pager { display: flex; gap: 1rem; align-items: center; margin: .5rem 0; }
+    .htmx-datatable-table { border-collapse: collapse; width: 100%; }
+    .htmx-datatable-table th, .htmx-datatable-table td { border: 1px solid #ccc; padding: .3rem .5rem; text-align: left; }
+    .htmx-datatable-filters input, .htmx-datatable-filters select { width: 100%; box-sizing: border-box; }
+    th button { all: unset; cursor: pointer; font-weight: bold; }
+    th[aria-sort="ascending"] button::after { content: " ▲"; }
+    th[aria-sort="descending"] button::after { content: " ▼"; }
+    .htmx-datatable-error { color: #b00020; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/spa/" data-link>Books</a> ·
+    <a href="/spa/two/" data-link>Two tables</a> ·
+    <a href="/spa/about/" data-link>About</a> ·
+    <a href="/">Django pages</a>
+  </nav>
+  <main id="app"></main>
+  <script>
+    const app = document.getElementById("app");
+
+    // Show a table: fetch it in the state of the page's URL, then let htmx run it
+    async function mountTable(el, endpoint, prefix) {
+      const query = new URLSearchParams(location.search);
+      if (prefix) query.set("_dt", prefix);
+      const response = await fetch(`${endpoint}?${query}`, { credentials: "same-origin" });
+      el.innerHTML = await response.text();
+      htmx.process(el);
+    }
+
+    function render() {
+      switch (location.pathname) {
+        case "/spa/about/":
+          app.innerHTML = "<h1>About</h1><p>A route of the client-side router, without tables.</p>";
+          break;
+        case "/spa/two/":
+          app.innerHTML = '<h1>Two tables</h1><h2>A</h2><div id="table-a"></div><h2>B</h2><div id="table-b"></div>';
+          mountTable(document.getElementById("table-a"), "/books/table/", "a");
+          mountTable(document.getElementById("table-b"), "/books/table/", "b");
+          break;
+        default:
+          app.innerHTML = '<h1>Books</h1><div id="table"></div>';
+          mountTable(document.getElementById("table"), "/books/table/", "");
+      }
+    }
+
+    // The router: links, back and forward
+    document.addEventListener("click", (event) => {
+      const link = event.target.closest("a[data-link]");
+      if (!link) return;
+      event.preventDefault();
+      history.pushState({ route: link.pathname }, "", link.href);
+      render();
+    });
+    window.addEventListener("popstate", render);
+
+    // The canonical URL of a table, applied by the router (with React Router:
+    // navigate(event.detail.path, { replace: true }))
+    document.body.addEventListener("htmx:replacedInHistory", (event) => {
+      history.replaceState(history.state, "", event.detail.path);
+    });
+
+    render();
+  </script>
+</body>
+</html>

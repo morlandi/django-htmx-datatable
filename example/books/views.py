@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from django.db.models import Count
+from django.http import FileResponse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
@@ -68,3 +71,11 @@ class CompareView(TemplateView):
         context["calvino"] = Author.objects.get(last_name="Calvino")
         context["pavese"] = Author.objects.get(last_name="Pavese")
         return context
+
+
+def spa_page(request, route=""):
+    """
+    A page served without the template engine, as by a single-page application
+    (#4): the same file for every route of its client-side router.
+    """
+    return FileResponse(open(Path(__file__).with_name("spa.html"), "rb"), content_type="text/html")
