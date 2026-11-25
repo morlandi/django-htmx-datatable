@@ -34,6 +34,15 @@ class TemplateTagTestCase(TestCase):
         html = self.render('{% htmx_datatable "books-table" template="tests/book_table.html" %}')
         self.assertIn("Add a book", html)
 
+    def test_template_of_the_view(self):
+        # Without template=, the view's table_template_name (#6)
+        html = self.render('{% htmx_datatable "custom-template-books-table" %}')
+        self.assertIn("Add a book", html)
+        html = self.render(
+            '{% htmx_datatable "custom-template-books-table" template="htmx_datatable/table.html" %}'
+        )
+        self.assertNotIn("Add a book", html)
+
     def test_without_request(self):
         template = Template('{% load htmx_datatable %}{% htmx_datatable "books-table" %}')
         with self.assertRaisesMessage(ImproperlyConfigured, "context_processors.request"):

@@ -8,6 +8,10 @@
   them can drop the overrides (#5).
 - README: translations, and how a page without Django templates tells the
   endpoint its language (#5).
+- `table_template_name`, a view attribute: the template of the whole table,
+  used by the endpoint's plain GET and by `{% htmx_datatable %}` without
+  `template=`. The default, `htmx_datatable/table.html`, does not change
+  (#6).
 
 ## 0.2.4 (2026-11-24)
 

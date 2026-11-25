@@ -527,6 +527,16 @@ version to the tag:
 {% htmx_datatable "books-table" template="books/book_table.html" %}
 ```
 
+To use it on every page that shows the table, set it on the view instead:
+the tag (without `template=`) and the endpoint's plain GET (see
+[Pages without Django templates](#pages-without-django-templates)) take it
+from there.
+
+```python
+class BookTableView(HtmxDatatableView):
+    table_template_name = "books/book_table.html"
+```
+
 Keep the element ids and the `name` attributes when you override a part: the
 htmx response replaces the parts by id, and the form sends the parameters by
 name. See [the `table` object](#the-table-object) for what the templates
@@ -657,7 +667,7 @@ path("authors/<int:pk>/books/table/", AuthorBookTableView.as_view(), name="autho
 
 **Without the tag: `embed()`.** The tag finds the view of the URL and calls
 its `embed()`, which returns [the `table` object](#the-table-object); then
-it renders `htmx_datatable/table.html` with it. A view can do the first part
+it renders the view's `table_template_name` with it. A view can do the first part
 itself, when it needs the table's data, or must choose in Python which table
 to show. The same page as above:
 
@@ -696,14 +706,17 @@ class CompareView(TemplateView):
   The tag takes both from the URL name; `embed()` needs both.
 - Prefixes follow the rules of the tag: call `embed()` once per table and
   request.
-- To use another template, include it instead of `htmx_datatable/table.html`.
+- To use another template, include it instead of `htmx_datatable/table.html`:
+  `embed()` does not choose the template, so the view's
+  `table_template_name` does not apply here.
 
 ## Pages without Django templates
 
 A page built in the browser, as by a single-page application (React, Vue,
 ...), has no template tag and no `embed()`. It still shows a table with the
 same features: the endpoint, requested without htmx, returns the whole table
-in the state of its query string.
+in the state of its query string, rendered with the view's
+`table_template_name` (step 7).
 
 1. Fetch the endpoint with the query string of the page's URL; with a
    prefix, add `_dt=<prefix>`.
@@ -882,6 +895,7 @@ override the choice, and always for annotations.
 | `page_sizes`              | `[10, 25, 50, 100]`              | rows per page; the first is the default                  |
 | `search_delay`            | `300`                            | ms to wait after typing before a request                 |
 | `search_values_separator` | `None`                           | OR separator in search and filter values, e.g. `"+"`     |
+| `table_template_name`     | `"htmx_datatable/table.html"`    | the whole table: plain GET, and the tag without `template=` |
 | `fragment_template_name`  | `"htmx_datatable/fragment.html"` | the template of the htmx response                        |
 
 ### The template tag
@@ -893,7 +907,7 @@ override the choice, and always for annotations.
 | `"url-name"`      | —                             | the URL name of the table's endpoint                     |
 | other keywords    | —                             | the kwargs of that URL, e.g. `pk=author.pk`              |
 | `prefix`          | `""`                          | prefix of the GET parameters and element ids; ASCII letters and digits |
-| `template`        | `"htmx_datatable/table.html"` | the template of the table, for this page only            |
+| `template`        | the view's `table_template_name` | the template of the table, for this page only         |
 
 In Python: `MyTableView.embed(request, *, url, prefix="", kwargs=None)`
 returns the `table` object, for `{% include "htmx_datatable/table.html" with table=... %}`.

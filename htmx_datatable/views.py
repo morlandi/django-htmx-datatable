@@ -47,6 +47,8 @@ class HtmxDatatableView(View):
     # Delay before the search or a text filter sends a request, in ms (J)
     search_delay = 300
     # # template_name: the consumer's page, which includes "htmx_datatable/table.html"
+    # The whole table: the plain GET, and {% htmx_datatable %} without template= (#6)
+    table_template_name = "htmx_datatable/table.html"
     fragment_template_name = "htmx_datatable/fragment.html"
 
     def __init_subclass__(cls, **kwargs):
@@ -173,7 +175,7 @@ class HtmxDatatableView(View):
             response["HX-Replace-Url"] = canonical_url(current_url, params, names)
         else:
             table = self.get_table(request, url=request.path, prefix=prefix, full=True)
-            response = TemplateResponse(request, "htmx_datatable/table.html", {"table": table})
+            response = TemplateResponse(request, self.table_template_name, {"table": table})
         patch_vary_headers(response, ["HX-Request"])
         return response
 

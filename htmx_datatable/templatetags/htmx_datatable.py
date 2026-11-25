@@ -7,6 +7,7 @@
 
 The first argument is the URL name of the table's endpoint; the keyword
 arguments other than prefix and template are the kwargs of that URL.
+Without template, the view's table_template_name is used (#6).
 """
 from django.core.exceptions import ImproperlyConfigured
 from django.template import Library
@@ -19,7 +20,7 @@ register = Library()
 
 
 @register.simple_tag(takes_context=True)
-def htmx_datatable(context, url_name, *, prefix="", template="htmx_datatable/table.html", **kwargs):
+def htmx_datatable(context, url_name, *, prefix="", template=None, **kwargs):
     request = context.get("request")
     if request is None:
         raise ImproperlyConfigured(
@@ -34,4 +35,4 @@ def htmx_datatable(context, url_name, *, prefix="", template="htmx_datatable/tab
             f"{{% htmx_datatable %}}: {url_name!r} is not the URL of an HtmxDatatableView"
         )
     table = view_class.embed(request, url=url, prefix=prefix, kwargs=match.kwargs)
-    return render_to_string(template, {"table": table}, request=request)
+    return render_to_string(template or view_class.table_template_name, {"table": table}, request=request)

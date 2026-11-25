@@ -20,6 +20,10 @@ class BookView(HtmxDatatableView):
     ]
 
 
+class CustomTemplateBookView(BookView):
+    table_template_name = "tests/book_table.html"
+
+
 class ViewTestCase(TestCase):
     fixtures = ["books_test"]
 
@@ -67,6 +71,13 @@ class FullPageTestCase(ViewTestCase):
     def test_boosted_request_gets_the_full_page(self):
         response = self.get(HX_Request="true", HX_Boosted="true")
         self.assertContains(response, '<form class="htmx-datatable-form"')
+
+    def test_table_template_name(self):
+        # The plain GET renders the view's template (#6)
+        self.assertContains(self.get(view_class=CustomTemplateBookView), "Add a book")
+        self.assertNotContains(self.get(), "Add a book")
+        # The htmx response is still the fragment
+        self.assertNotContains(self.htmx(view_class=CustomTemplateBookView), "Add a book")
 
 
 class FragmentTestCase(ViewTestCase):
