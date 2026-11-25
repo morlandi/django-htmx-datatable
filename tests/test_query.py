@@ -3,7 +3,7 @@ from django.db.models import Count
 from django.test import RequestFactory, TestCase
 
 from example.books.models import Book
-from htmx_datatable.columns import Column, NumberColumn
+from htmx_datatable.columns import Column, ComputedColumn, NumberColumn
 from htmx_datatable.state import TableState
 from htmx_datatable.views import HtmxDatatableView
 
@@ -163,6 +163,26 @@ class ChoicesTestCase(QueryTestCase):
             view.get_column_choices(None, column),
             [("Calvino", "Calvino"), ("Eco", "Eco"), ("Ginzburg", "Ginzburg"), ("Morante", "Morante")],
         )
+
+    def test_computed_autofilter_without_choices(self):
+        # The default cannot read distinct values without a field (#8)
+        class View(HtmxDatatableView):
+            model = Book
+            columns = [ComputedColumn("decade", autofilter=True)]
+
+            def render_decade(self, obj, value):
+                return ""
+
+            def filter_decade(self, qs, value):
+                return qs
+
+        view = View()
+        (column,) = view.get_bound_columns(None)
+        with self.assertRaisesMessage(
+            ImproperlyConfigured,
+            "View, column 'decade': autofilter on a computed column needs get_column_choices()",
+        ):
+            view.get_column_choices(None, column)
 
     def test_static(self):
         view = BookView()

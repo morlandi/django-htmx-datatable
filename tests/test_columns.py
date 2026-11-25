@@ -163,6 +163,14 @@ class ValidationTestCase(SimpleTestCase):
     def test_computed_without_render(self):
         self.assertInvalid("a computed column needs a render_cover() method", ComputedColumn("cover"))
 
+    def test_computed_autofilter_without_filter(self):
+        # The value chosen in the select would go nowhere (#8)
+        self.assertInvalid(
+            "BookView, column 'decade': autofilter on a computed column needs a filter_decade() method",
+            ComputedColumn("decade", autofilter=True),
+            render_decade=noop_render,
+        )
+
     def test_searchable_without_fields(self):
         self.assertInvalid("searchable=True needs search_fields", Column("author", searchable=True))
 

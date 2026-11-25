@@ -372,6 +372,34 @@ Column("tags__name", title=_("Tags"), autofilter=True),
 The choices are computed only when the whole page is rendered, never when the
 table updates.
 
+**A select on a computed column** (step 5). A `ComputedColumn` has no field
+to read the values from: with `choices=[...]` it gets a select with fixed
+options; with `autofilter=True` the view computes them, in
+`get_column_choices()`. Either way, the view filters with `filter_<name>()`
+(step 8), which `autofilter` requires:
+
+```python
+class BookTableView(HtmxDatatableView):
+    columns = [
+        # ...
+        ComputedColumn("decade", autofilter=True),
+    ]
+
+    def render_decade(self, obj, value):
+        return f"{obj.published.year // 10 * 10}s" if obj.published else ""
+
+    def filter_decade(self, qs, value):
+        if not value.isdigit():
+            return qs.none()
+        return qs.filter(published__year__gte=int(value), published__year__lt=int(value) + 10)
+
+    def get_column_choices(self, request, column):
+        if column.name == "decade":  # the decades in the table
+            years = self.get_initial_queryset(request).dates("published", "year")
+            return [(str(d), f"{d}s") for d in sorted({y.year // 10 * 10 for y in years})]
+        return super().get_column_choices(request, column)
+```
+
 ![Filters: genre, available, tags](https://raw.githubusercontent.com/morlandi/django-htmx-datatable/main/screenshots/filters.png)
 
 ### Step 5: computed and annotated columns
@@ -877,7 +905,7 @@ annotation.
 | `nulls_last`           | `False`        | empty values last, in both directions                           |
 | `lookup_field`         | `"icontains"`  | lookup of the text search                                       |
 | `choices`              | field choices  | `False`: none; a sequence: these choices                        |
-| `autofilter`           | `False`        | a select with the distinct values of the column                 |
+| `autofilter`           | `False`        | a select with the distinct values of the column; on a `ComputedColumn`, with the choices of `get_column_choices()` |
 | `max_length`           | `None`         | clip longer text, with the full text in a tooltip               |
 | `css_class`            | `None`         | CSS class of the column's cells                                 |
 | `annotation`           | `False`        | the name is an annotation (typed columns only)                  |
@@ -937,7 +965,7 @@ returns the `table` object, for `{% include "htmx_datatable/table.html" with tab
 | `get_columns(request)`                  | the column declarations for this request             |
 | `render_<name>(obj, value)`             | the content of a cell                                |
 | `filter_<name>(qs, value)`              | the filter of a column                               |
-| `get_column_choices(request, column)`   | the options of a column's select                     |
+| `get_column_choices(request, column)`   | the options of a column's select; required for `autofilter` on a `ComputedColumn` |
 | `optimize_queryset(qs, columns)`        | `select_related` / `prefetch_related`                |
 | `get_table_queryset(request, state)`    | the whole query: returns `(queryset, errors)`        |
 

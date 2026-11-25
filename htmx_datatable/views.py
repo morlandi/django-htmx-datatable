@@ -82,6 +82,13 @@ class HtmxDatatableView(View):
                 raise ImproperlyConfigured(
                     f"{prefix}: a computed column needs a render_{column.name}() method"
                 )
+            # The value chosen in the select would go nowhere (#8)
+            if isinstance(column, ComputedColumn) and column.autofilter and not callable(
+                getattr(cls, f"filter_{column.name}", None)
+            ):
+                raise ImproperlyConfigured(
+                    f"{prefix}: autofilter on a computed column needs a filter_{column.name}() method"
+                )
             try:
                 bound.append(column.bind(cls.model, annotations))
             except ImproperlyConfigured as e:
@@ -343,6 +350,12 @@ class HtmxDatatableView(View):
         """
         choices = column.static_choices()
         if choices is None and column.autofilter:
+            # No field to read the distinct values from (#8)
+            if isinstance(column, ComputedColumn):
+                raise ImproperlyConfigured(
+                    f"{type(self).__name__}, column {column.name!r}: autofilter on a computed "
+                    "column needs get_column_choices() to return its choices"
+                )
             values = (
                 self.get_initial_queryset(request)
                 .order_by(column.name)

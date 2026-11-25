@@ -3,7 +3,7 @@ from django.test import RequestFactory, TestCase
 from django.utils.html import format_html
 
 from example.books.models import Book
-from htmx_datatable.columns import Column
+from htmx_datatable.columns import Column, ComputedColumn
 from htmx_datatable.views import HtmxDatatableView
 
 
@@ -22,6 +22,28 @@ class BookView(HtmxDatatableView):
 
 class CustomTemplateBookView(BookView):
     table_template_name = "tests/book_table.html"
+
+
+class DecadeBookView(HtmxDatatableView):
+    """A computed column with autofilter: the choices come from the view (#8)."""
+
+    model = Book
+    columns = [Column("title"), ComputedColumn("decade", autofilter=True)]
+
+    def render_decade(self, obj, value):
+        return f"{obj.published.year // 10 * 10}s" if obj.published else ""
+
+    def filter_decade(self, qs, value):
+        if not value.isdigit():
+            return qs.none()
+        return qs.filter(published__year__gte=int(value), published__year__lt=int(value) + 10)
+
+    def get_column_choices(self, request, column):
+        if column.name == "decade":
+            years = self.get_initial_queryset(request).dates("published", "year")
+            decades = sorted({d.year // 10 * 10 for d in years})
+            return [(str(d), f"{d}s") for d in decades]
+        return super().get_column_choices(request, column)
 
 
 class ViewTestCase(TestCase):
@@ -72,6 +94,14 @@ class FullPageTestCase(ViewTestCase):
     def test_boosted_request_gets_the_full_page(self):
         response = self.get(HX_Request="true", HX_Boosted="true")
         self.assertContains(response, '<form class="htmx-datatable-form"')
+
+    def test_computed_autofilter(self):
+        # The select of a computed column, with the choices of the view (#8)
+        response = self.get("f_decade=1970", view_class=DecadeBookView)
+        self.assertContains(response, '<option value="1950">1950s</option>', html=True)
+        self.assertContains(response, '<option value="1970" selected>1970s</option>', html=True)
+        self.assertContains(response, '<option value="1980">1980s</option>', html=True)
+        self.assertContains(response, "1–3 of 3")
 
     def test_table_template_name(self):
         # The plain GET renders the view's template (#6)

@@ -18,6 +18,13 @@
   CSS) and the header can stay fixed; see step 7 in the README. A CSS
   selector with the `<table>` as a direct child of the form
   (`.htmx-datatable-form > table`) no longer matches (#7).
+- `autofilter=True` on a `ComputedColumn`: a select whose choices come from
+  the view's `get_column_choices()`, documented in step 4 of the README.
+  Without a `filter_<name>()` method the view is rejected when the class is
+  defined (before, `autofilter` was ignored, or failed with a `FieldError`);
+  without the choices from `get_column_choices()`, the default raises an
+  `ImproperlyConfigured` naming the view and the column, instead of a
+  `FieldError` (#8).
 
 ## 0.2.4 (2026-11-24)
 
