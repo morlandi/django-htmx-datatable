@@ -1,30 +1,41 @@
 # Changelog
 
-## Unreleased
+## 0.2.5 (2026-11-25)
+
+New:
 
 - Translations of the library's texts, shipped in the package: `ar`, `bn`,
   `cs`, `da`, `de`, `el`, `es`, `fa`, `fi`, `fr`, `hu`, `id`, `it`, `kk`,
   `ms`, `nl`, `pl`, `pt`, `pt_BR`, `ro`, `ru`, `sv`, `th`, `tr`, `uk`, `ur`,
-  `zh_Hans`. English stays the default. Projects that overrode the templates only to translate
-  them can drop the overrides (#5).
-- README: translations, and how a page without Django templates tells the
-  endpoint its language (#5).
+  `zh_Hans`. English stays the default. Projects that overrode the templates
+  only to translate them can drop the overrides (#5).
 - `table_template_name`, a view attribute: the template of the whole table,
   used by the endpoint's plain GET and by `{% htmx_datatable %}` without
   `template=`. The default, `htmx_datatable/table.html`, does not change
   (#6).
+- `autofilter=True` on a `ComputedColumn`: a select whose choices come from
+  the view's `get_column_choices()`, documented in step 4 of the README.
+  Without the choices from `get_column_choices()`, the default raises an
+  `ImproperlyConfigured` naming the view and the column, instead of a
+  `FieldError` (#8).
+
+Changed:
+
 - `table.html` wraps the `<table>` in `<div class="htmx-datatable-scroll">`,
   so that a wide table can scroll (with `overflow: auto` in the project's
   CSS) and the header can stay fixed; see step 7 in the README. A CSS
   selector with the `<table>` as a direct child of the form
   (`.htmx-datatable-form > table`) no longer matches (#7).
-- `autofilter=True` on a `ComputedColumn`: a select whose choices come from
-  the view's `get_column_choices()`, documented in step 4 of the README.
-  Without a `filter_<name>()` method the view is rejected when the class is
-  defined (before, `autofilter` was ignored, or failed with a `FieldError`);
-  without the choices from `get_column_choices()`, the default raises an
-  `ImproperlyConfigured` naming the view and the column, instead of a
-  `FieldError` (#8).
+- `autofilter=True` on a `ComputedColumn` without a `filter_<name>()` method
+  is rejected when the class is defined; before, `autofilter` was ignored,
+  or failed with a `FieldError` (#8).
+
+Documentation:
+
+- README: translations, and how a page without Django templates tells the
+  endpoint its language (#5).
+- The example project has a `/scroll/` page: a wide table in a small box,
+  with a fixed header (#7).
 
 ## 0.2.4 (2026-11-24)
 
