@@ -828,8 +828,12 @@ above. See [#4](https://github.com/morlandi/django-htmx-datatable/issues/4).
 The texts of the library ("Search", "Rows per page", "No matching rows", the
 filter errors, ...) follow the active language. English is the default; the
 package ships catalogs for Arabic (`ar`), Bengali (`bn`), Chinese simplified
-(`zh-hans`), Indonesian (`id`), Italian (`it`), Kazakh (`kk`), Malay (`ms`),
-Persian (`fa`), Russian (`ru`), Thai (`th`), Turkish (`tr`) and Urdu (`ur`).
+(`zh-hans`), Czech (`cs`), Danish (`da`), Dutch (`nl`), Finnish (`fi`),
+French (`fr`), German (`de`), Greek (`el`), Hungarian (`hu`), Indonesian
+(`id`), Italian (`it`), Kazakh (`kk`), Malay (`ms`), Persian (`fa`), Polish
+(`pl`), Portuguese (`pt`), Brazilian Portuguese (`pt-br`), Romanian (`ro`),
+Russian (`ru`), Spanish (`es`), Swedish (`sv`), Thai (`th`), Turkish (`tr`),
+Ukrainian (`uk`) and Urdu (`ur`).
 
 Nothing to configure beyond Django's usual setup: `USE_I18N = True` (the
 default), and the language chosen per request, typically by
