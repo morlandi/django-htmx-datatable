@@ -1,0 +1,75 @@
+# django-htmx-datatable translations.
+# This file is distributed under the same license as the django-htmx-datatable package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-htmx-datatable\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-25 08:39+0100\n"
+"Language: id\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: columns.py:237
+msgid "Enter a number."
+msgstr "Masukkan sebuah bilangan."
+
+#: columns.py:257
+msgid "Enter a valid date."
+msgstr "Masukkan tanggal yang valid."
+
+#: columns.py:288 columns.py:301
+msgid "Yes"
+msgstr "Ya"
+
+#: columns.py:288 columns.py:301
+msgid "No"
+msgstr "Tidak"
+
+#: columns.py:295
+msgid "Select Yes or No."
+msgstr "Pilih Ya atau Tidak."
+
+#: templates/htmx_datatable/body.html:10
+msgid "No matching rows"
+msgstr "Tidak ada baris yang cocok"
+
+#: templates/htmx_datatable/filter_row.html:8
+msgid "All"
+msgstr "Semua"
+
+#: templates/htmx_datatable/pager.html:2
+msgid "Pages"
+msgstr "Halaman"
+
+#: templates/htmx_datatable/pager.html:5
+msgid "Previous page"
+msgstr "Halaman sebelumnya"
+
+#: templates/htmx_datatable/pager.html:17
+msgid "Next page"
+msgstr "Halaman berikutnya"
+
+#: templates/htmx_datatable/status.html:5
+#, python-format
+msgid "%(start)s–%(end)s of %(rows)s"
+msgstr "%(start)s–%(end)s dari %(rows)s"
+
+#: templates/htmx_datatable/status.html:7
+msgid "No rows"
+msgstr "Tidak ada baris"
+
+#: templates/htmx_datatable/status.html:10
+#, python-format
+msgid "(filtered from %(total)s)"
+msgstr "(disaring dari %(total)s)"
+
+#: templates/htmx_datatable/toolbar.html:5
+msgid "Search"
+msgstr "Cari"
+
+#: templates/htmx_datatable/toolbar.html:8
+msgid "Rows per page"
+msgstr "Baris per halaman"

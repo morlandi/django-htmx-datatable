@@ -39,7 +39,7 @@ Repository = "https://github.com/morlandi/django-htmx-datatable"
 include = ["htmx_datatable*"]
 
 [tool.setuptools.package-data]
-htmx_datatable = ["templates/htmx_datatable/*.html"]
+htmx_datatable = ["templates/htmx_datatable/*.html", "locale/*/LC_MESSAGES/django.*"]
 
 [tool.setuptools.dynamic]
 version = { attr = "htmx_datatable.__version__" }

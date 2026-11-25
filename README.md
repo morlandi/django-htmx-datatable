@@ -63,6 +63,7 @@ without jQuery and datatables.net.
   8. [Per-request data, custom filters](#step-8-per-request-data-custom-filters)
   9. [Several tables on one page](#step-9-several-tables-on-one-page)
 - [Pages without Django templates](#pages-without-django-templates)
+- [Translations](#translations)
 - [Reference](#reference)
 - [How it works](#how-it-works)
 - [Coming from django-ajax-datatable](#coming-from-django-ajax-datatable)
@@ -777,6 +778,26 @@ export function HtmxDatatable({ endpoint, prefix = "" }) {
   so the table comes back in its state.
 - **Styles.** The table is part of the page, so the application's CSS
   styles it (step 7).
+- **The language.** The application chooses it (i18next, ...), Django does
+  not know it. With `LocaleMiddleware` in the project, tell the endpoint
+  (see [Translations](#translations)), then load the table again.
+
+Write Django's language cookie (`LANGUAGE_COOKIE_NAME`, `django_language` by
+default) when the user changes language: the first fetch and the htmx
+requests send it, with nothing to do on the htmx side.
+
+```js
+document.cookie = `django_language=${language}; path=/; SameSite=Lax`;
+```
+
+Or send `Accept-Language`, on the first fetch and on every htmx request (the
+cookie, when present, wins over the header):
+
+```js
+document.body.addEventListener("htmx:configRequest", (event) => {
+  event.detail.headers["Accept-Language"] = i18next.language;
+});
+```
 
 The `/spa/` page of the [example project](#example-project) does the same in
 plain JavaScript, with a small client-side router.
@@ -788,6 +809,24 @@ not grow with the table, the table does not get the application's styles,
 and links in the cells open inside the iframe. It suits a self-contained
 tool; for a table that is part of the application, prefer the approach
 above. See [#4](https://github.com/morlandi/django-htmx-datatable/issues/4).
+
+## Translations
+
+The texts of the library ("Search", "Rows per page", "No matching rows", the
+filter errors, ...) follow the active language. English is the default; the
+package ships catalogs for Arabic (`ar`), Bengali (`bn`), Chinese simplified
+(`zh-hans`), Indonesian (`id`), Italian (`it`), Kazakh (`kk`), Malay (`ms`),
+Persian (`fa`), Russian (`ru`), Thai (`th`), Turkish (`tr`) and Urdu (`ur`).
+
+Nothing to configure beyond Django's usual setup: `USE_I18N = True` (the
+default), and the language chosen per request, typically by
+`django.middleware.locale.LocaleMiddleware`.
+
+To change a text or add a language, copy
+`htmx_datatable/locale/it/LC_MESSAGES/django.po` into a directory of
+`LOCALE_PATHS` (`<path>/<language>/LC_MESSAGES/django.po`), write the
+translations and run `compilemessages`: the catalogs of `LOCALE_PATHS` win
+over those of the app. Fixes and new languages are welcome as pull requests.
 
 ## Reference
 
@@ -1008,6 +1047,16 @@ which imports the library from there.
 
 The tests use the models of the example project and the small `books_test`
 fixture (9 books); the example project loads `books` (267 books).
+
+The catalogs are in `htmx_datatable/locale`, `.mo` files included. After
+changing a text of the library, update and compile them (requires GNU
+gettext):
+
+```bash
+cd htmx_datatable
+django-admin makemessages --no-obsolete -a
+django-admin compilemessages
+```
 
 ## License
 

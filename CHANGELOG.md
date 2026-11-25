@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Translations of the library's texts, shipped in the package: `ar`, `bn`,
+  `fa`, `id`, `it`, `kk`, `ms`, `ru`, `th`, `tr`, `ur`, `zh_Hans`. English
+  stays the default. Projects that overrode the templates only to translate
+  them can drop the overrides (#5).
+- README: translations, and how a page without Django templates tells the
+  endpoint its language (#5).
+
 ## 0.2.4 (2026-11-24)
 
 Documentation:

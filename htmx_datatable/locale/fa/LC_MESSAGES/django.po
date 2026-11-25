@@ -1,0 +1,75 @@
+# django-htmx-datatable translations.
+# This file is distributed under the same license as the django-htmx-datatable package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-htmx-datatable\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-25 08:39+0100\n"
+"Language: fa\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: columns.py:237
+msgid "Enter a number."
+msgstr "یک عدد وارد کنید."
+
+#: columns.py:257
+msgid "Enter a valid date."
+msgstr "یک تاریخ معتبر وارد کنید."
+
+#: columns.py:288 columns.py:301
+msgid "Yes"
+msgstr "بله"
+
+#: columns.py:288 columns.py:301
+msgid "No"
+msgstr "خیر"
+
+#: columns.py:295
+msgid "Select Yes or No."
+msgstr "بله یا خیر را انتخاب کنید."
+
+#: templates/htmx_datatable/body.html:10
+msgid "No matching rows"
+msgstr "هیچ ردیف منطبقی وجود ندارد"
+
+#: templates/htmx_datatable/filter_row.html:8
+msgid "All"
+msgstr "همه"
+
+#: templates/htmx_datatable/pager.html:2
+msgid "Pages"
+msgstr "صفحه‌ها"
+
+#: templates/htmx_datatable/pager.html:5
+msgid "Previous page"
+msgstr "صفحهٔ قبل"
+
+#: templates/htmx_datatable/pager.html:17
+msgid "Next page"
+msgstr "صفحهٔ بعد"
+
+#: templates/htmx_datatable/status.html:5
+#, python-format
+msgid "%(start)s–%(end)s of %(rows)s"
+msgstr "%(start)s–%(end)s از %(rows)s"
+
+#: templates/htmx_datatable/status.html:7
+msgid "No rows"
+msgstr "هیچ ردیفی وجود ندارد"
+
+#: templates/htmx_datatable/status.html:10
+#, python-format
+msgid "(filtered from %(total)s)"
+msgstr "(فیلترشده از %(total)s)"
+
+#: templates/htmx_datatable/toolbar.html:5
+msgid "Search"
+msgstr "جستجو"
+
+#: templates/htmx_datatable/toolbar.html:8
+msgid "Rows per page"
+msgstr "ردیف در هر صفحه"
