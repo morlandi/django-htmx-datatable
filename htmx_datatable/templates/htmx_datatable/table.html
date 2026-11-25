@@ -7,13 +7,16 @@
     {% if table.prefix %}<input type="hidden" name="_dt" value="{{ table.prefix }}">{% endif %}
     {% block toolbar %}{% include "htmx_datatable/toolbar.html" %}{% endblock %}
     {% block status %}{% include "htmx_datatable/status.html" %}{% endblock %}
-    <table class="htmx-datatable-table">
-      <thead>
-        {% block header %}{% include "htmx_datatable/header_row.html" %}{% endblock %}
-        {% if table.has_filters %}{% block filters %}{% include "htmx_datatable/filter_row.html" %}{% endblock %}{% endif %}
-      </thead>
-      {% block body %}{% include "htmx_datatable/body.html" %}{% endblock %}
-    </table>
+    {# A wide table scrolls here; styles are up to the project (#7) #}
+    <div class="htmx-datatable-scroll">
+      <table class="htmx-datatable-table">
+        <thead>
+          {% block header %}{% include "htmx_datatable/header_row.html" %}{% endblock %}
+          {% if table.has_filters %}{% block filters %}{% include "htmx_datatable/filter_row.html" %}{% endblock %}{% endif %}
+        </thead>
+        {% block body %}{% include "htmx_datatable/body.html" %}{% endblock %}
+      </table>
+    </div>
     {% block pager %}{% include "htmx_datatable/pager.html" %}{% endblock %}
   </form>
 </div>

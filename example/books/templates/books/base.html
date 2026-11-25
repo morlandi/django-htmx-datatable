@@ -9,6 +9,7 @@
     body { font-family: system-ui, sans-serif; margin: 2rem; }
     nav { margin-bottom: 1rem; }
     .htmx-datatable-toolbar, .htmx-datatable-status, .htmx-datatable-pager { display: flex; gap: 1rem; align-items: center; margin: .5rem 0; }
+    .htmx-datatable-scroll { overflow-x: auto; }
     .htmx-datatable-table { border-collapse: collapse; width: 100%; }
     .htmx-datatable-table th, .htmx-datatable-table td { border: 1px solid #ccc; padding: .3rem .5rem; text-align: left; }
     .htmx-datatable-filters input, .htmx-datatable-filters select { width: 100%; box-sizing: border-box; }
@@ -19,7 +20,7 @@
   </style>
 </head>
 <body>
-  <nav><a href="{% url 'books' %}">Books</a> · <a href="{% url 'compare' %}">Two authors</a> · <a href="{% url 'spa' %}">Without templates</a></nav>
+  <nav><a href="{% url 'books' %}">Books</a> · <a href="{% url 'compare' %}">Two authors</a> · <a href="{% url 'scroll' %}?page_size=25">Scrolling</a> ·<a href="{% url 'spa' %}">Without templates</a></nav>
   {% block content %}{% endblock %}
 </body>
 </html>

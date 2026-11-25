@@ -13,6 +13,11 @@
   used by the endpoint's plain GET and by `{% htmx_datatable %}` without
   `template=`. The default, `htmx_datatable/table.html`, does not change
   (#6).
+- `table.html` wraps the `<table>` in `<div class="htmx-datatable-scroll">`,
+  so that a wide table can scroll (with `overflow: auto` in the project's
+  CSS) and the header can stay fixed; see step 7 in the README. A CSS
+  selector with the `<table>` as a direct child of the form
+  (`.htmx-datatable-form > table`) no longer matches (#7).
 
 ## 0.2.4 (2026-11-24)
 

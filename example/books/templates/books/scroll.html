@@ -1,0 +1,15 @@
+{% extends "books/base.html" %}
+{% load htmx_datatable %}
+{% block title %}Scrolling{% endblock %}
+{% block content %}
+  <h1>Scrolling</h1>
+  <p>The table scrolls inside a small box; the column titles and the filters stay in place (#7).</p>
+  <style>
+    .demo-scroll { max-width: 40rem; }
+    .demo-scroll .htmx-datatable-scroll { overflow: auto; max-height: 20rem; border: 1px solid #ccc; }
+    .demo-scroll thead { position: sticky; top: 0; background: white; }
+    .demo-scroll .htmx-datatable-table { border-collapse: separate; border-spacing: 0; }
+    .demo-scroll .htmx-datatable-table td, .demo-scroll .htmx-datatable-table th { white-space: nowrap; }
+  </style>
+  <div class="demo-scroll">{% htmx_datatable "books-table" %}</div>
+{% endblock %}

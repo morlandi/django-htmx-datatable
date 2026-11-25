@@ -476,12 +476,25 @@ The templates have no styles: stable class names and plain markup. Style them
 from your CSS:
 
 ```css
+.htmx-datatable-scroll { overflow-x: auto; }
 .htmx-datatable-table { border-collapse: collapse; width: 100%; }
 .htmx-datatable-table th, .htmx-datatable-table td { border: 1px solid #ccc; padding: .3rem .5rem; }
 th button { all: unset; cursor: pointer; font-weight: bold; }
 th[aria-sort="ascending"] button::after { content: " ▲"; }
 th[aria-sort="descending"] button::after { content: " ▼"; }
 .htmx-datatable-error { color: #b00020; }
+```
+
+The `<table>` is wrapped in `<div class="htmx-datatable-scroll">`, so a
+table wider than the page, or than a dialog, scrolls inside it, while the
+toolbar, the status and the pager stay in place. To scroll the rows under a
+fixed header (the column titles and the filters), give it a height too:
+
+```css
+.htmx-datatable-scroll { overflow: auto; max-height: 60vh; }
+.htmx-datatable-scroll thead { position: sticky; top: 0; background: white; }
+/* with "collapse", the borders of the header do not stay with it */
+.htmx-datatable-table { border-collapse: separate; border-spacing: 0; }
 ```
 
 Set the CSS class of a column's cells with `css_class`:
@@ -1032,7 +1045,8 @@ row tools, footer totals and multi-column sort; they are on the roadmap.
 
 The [example project](https://github.com/morlandi/django-htmx-datatable/tree/main/example)
 in the repository has the books table of the tutorial, with a few hundred
-Italian classics, the page with two tables of step 9 (`/compare/`), and a
+Italian classics, the page with two tables of step 9 (`/compare/`), the
+table in a small box with a fixed header of step 7 (`/scroll/`), and a
 page served without Django templates, with a small client-side router
 (`/spa/`, see [Pages without Django templates](#pages-without-django-templates)):
 

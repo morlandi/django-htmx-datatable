@@ -50,6 +50,7 @@ class FullPageTestCase(ViewTestCase):
         self.assertContains(response, '<form class="htmx-datatable-form"')
         self.assertContains(response, 'id="dt-body"')
         self.assertContains(response, 'class="htmx-datatable-filters"')
+        self.assertContains(response, '<div class="htmx-datatable-scroll">')
         self.assertNotContains(response, "hx-swap-oob")
         self.assertNotIn("HX-Replace-Url", response)
         self.assertIn("HX-Request", response["Vary"])
@@ -87,6 +88,7 @@ class FragmentTestCase(ViewTestCase):
         content = response.content.decode()
         self.assertNotIn("htmx-datatable-filters", content)
         self.assertNotIn("<form", content)
+        self.assertNotIn("htmx-datatable-scroll", content)
         for element_id in ("dt-body", "dt-head", "dt-o", "dt-status", "dt-pager"):
             self.assertIn(f'id="{element_id}"', content)
         self.assertEqual(content.count('hx-swap-oob="true"'), 5)
